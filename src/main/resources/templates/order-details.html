@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Order Details</title>
+    <link rel="stylesheet" href="/css/reset-css.css"/>
+    <link rel="stylesheet" href="/css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/main.css"/>
+    <script src="/js/jquery-3.5.1.slim.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+
+<div th:replace="~{fragments/navbar}">Navbar</div>
+
+
+<div class="container-fluid">
+    <h2 class="text-center text-white mt-5">Order details</h2>
+    <div class="offers row mx-auto d-flex flex-row justify-content-center">
+        <div class="offer card col-sm-6 col-md-3  col-lg-4 m-1 p-0">
+            <p sec:authorize="hasRole('ADMIN')" th:object="${order}" class="text-center text-black mt-2">Customer:
+                <th:block th:text="*{owner.fullName}"></th:block>
+            </p>
+            <p th:object="${order}" class="text-center text-black mt-2">Status:
+                <th:block th:if="*{isProcessed}"> processed</th:block>
+                <th:block th:unless="*{isProcessed}"> unprocessed</th:block>
+            </p>
+            <ul class="offer-details list-group list-group-flush">
+                <li class="list-group-item" th:each="entry : ${items}">
+                    <div class="card-text">
+                        <th:block th:text="*{entry.value}"></th:block>
+                        x
+                        <a th:href="@{/books/{bookId}/details(bookId=*{entry.key.id})}"
+                           th:text="*{entry.key.title}"></a>
+                        by
+                        <a th:href="@{/authors/{authorId}(authorId=*{entry.key.author.id})}"
+                           th:text="*{entry.key.author.fullName}"></a>
+                    </div>
+                </li>
+            </ul>
+            <form th:unless="*{order.isProcessed}" sec:authorize="hasRole('ADMIN')" class="card-body"
+                  th:action="@{/orders/{id}/confirm(id=*{id})}" th:method="post">
+                <input type="submit" class="btn btn-success" value="Confirm order">
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<div>
+    <footer></footer>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,72 @@
+spring:
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/bookstore-backend?allowPublicKeyRetrieval=true&useSSL=false&createDatabaseIfNotExist=true&serverTimezone=UTC
+    username: root
+    password: 1234
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: create-drop
+    defer-datasource-initialization: true
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
+  security:
+    oauth2:
+      client:
+        registration:
+          facebook:
+            clientId: 625004692465831
+            clientSecret: ${FACEBOOK_CLIENT_SECRET}
+          google:
+            clientId: 462739601011-7qou3lsh8gnpl9hfn1oo2fipi49k11kg.apps.googleusercontent.com
+            clientSecret: ${GOOGLE_CLIENT_SECRET}
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  sql:
+    init:
+      mode: always
+
+  #SMTP configuration
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: teodora.nencheva1@gmail.com
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+springdoc:
+  springdoc:
+    api-docs:
+      enabled: true
+      path: /v3/api-docs/swagger-config
+    swagger-ui:
+      path: /index.html
+      disable-swagger-default-url: true
+      config-url: /v3/api-docs/swagger-config
+      url: /v3/api-docs
+
+#secure token configuration
+secure:
+  token:
+    validity: 24
+site:
+  base:
+    url: http://localhost:8080
+
+#cloudinary properties
+cloudinary:
+  api-key: 468519295473947
+  api-secret: ${CLOUDINARY_API_SECRET}
+  cloud-name: teodoran

@@ -1,0 +1,49 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.0.1'
+	id 'io.spring.dependency-management' version '1.1.0'
+}
+
+group = 'bg.softuni'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+
+	implementation 'org.mapstruct:mapstruct:1.5.1.Final'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.1.Final'
+
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+	implementation 'org.springframework.security:spring-security-oauth2-client'
+	implementation 'org.springdoc:springdoc-openapi-ui:1.6.11'
+	implementation 'org.springframework.boot:spring-boot-starter-mail:2.7.3'
+	implementation 'com.cloudinary:cloudinary:1.0.14'
+	implementation 'org.springframework.security:spring-security-oauth2-jose:5.7.3'
+	implementation 'com.sun.mail:jakarta.mail:2.0.1'
+
+	runtimeOnly 'com.mysql:mysql-connector-j'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation 'com.icegreen:greenmail:1.6.10'
+	testImplementation 'com.icegreen:greenmail-junit5:1.6.10'
+
+	testRuntimeOnly 'org.hsqldb:hsqldb'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

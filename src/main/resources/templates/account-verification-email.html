@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Confirm your email</title>
+    <link rel="stylesheet" href="/css/reset-css.css"/>
+    <link rel="stylesheet" href="/css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/main.css"/>
+    <script src="/js/jquery-3.5.1.slim.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+
+<div class="container text-center text-white">
+    <h2>Finish creating your account.</h2>
+    <h3>Dear, <span th:text="${fullName}"></span></h3>
+    <h3>We're excited to have you get started. First, you need to confirm your account. Just press the button
+        below.</h3>
+    <a class="btn btn-success btn-lg" th:href="${verificationURL}">Validate Account</a>
+
+    <h3>If you experience any issues with the button above, copy and paste the URL below into your web browser.</h3>
+    <span th:text="${verificationURL}" class="text-success text-lg-center"></span>
+</div>
+
+<div>
+    <footer></footer>
+</div>
+</body>
+</html>
