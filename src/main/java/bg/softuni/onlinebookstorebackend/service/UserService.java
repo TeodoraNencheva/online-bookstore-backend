@@ -29,6 +29,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -139,8 +140,15 @@ public class UserService {
 
 
     @Transactional
-    public Map<BookEntity, Integer> getUserCart(UserDetails userDetails) {
-        return getUser(userDetails).getCart();
+    public Map<Long, Integer> getUserCart(UserDetails userDetails) {
+        Map<BookEntity, Integer> cart = getUser(userDetails).getCart();
+        Map<Long, Integer> result = new LinkedHashMap<>();
+
+        for (BookEntity bookEntity : cart.keySet()) {
+            result.put(bookEntity.getId(), cart.get(bookEntity));
+        }
+
+        return result;
     }
 
     public void removeItemFromCart(Long bookId, UserDetails userDetails) {
@@ -161,6 +169,10 @@ public class UserService {
     }
 
     public UserEntity getUser(UserDetails userDetails) {
+        if (userDetails == null) {
+            throw new UsernameNotFoundException("");
+        }
+
         Optional<UserEntity> userOpt = userRepository.findByEmail(userDetails.getUsername());
         if (userOpt.isEmpty() || !userOpt.get().isAccountVerified()) {
             throw new UsernameNotFoundException(userDetails.getUsername());

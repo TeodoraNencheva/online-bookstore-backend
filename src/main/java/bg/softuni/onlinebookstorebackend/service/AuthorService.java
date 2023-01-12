@@ -58,7 +58,7 @@ public class AuthorService {
         return authorMapper.authorEntityToAuthorDetailsDTO(authorOpt.get());
     }
 
-    //@PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public AuthorEntity addNewAuthor(AddNewAuthorDTO authorModel) throws IOException {
         if (authorModel.getPicture() != null && !authorModel.getPicture().getOriginalFilename().isEmpty()) {
             PictureEntity picture = new PictureEntity(cloudinaryService.upload(authorModel.getPicture()));

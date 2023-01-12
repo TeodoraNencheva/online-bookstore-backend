@@ -20,19 +20,15 @@ public class AuthorSpecification implements Specification<AuthorEntity> {
     public Predicate toPredicate(Root<AuthorEntity> root,
                                  CriteriaQuery<?> query,
                                  CriteriaBuilder cb) {
-        Predicate p = cb.conjunction();
+        Predicate firstNamePredicate = cb.like(cb.lower(root.get("firstName")),
+                "%" + searchDTO.getSearchText().toLowerCase() + "%");
 
-        Predicate firstNamePredicate = cb.like(root.get("firstName"),
-                "%" + searchDTO.getSearchText() + "%");
+        Predicate lastNamePredicate = cb.like(cb.lower(root.get("lastName")),
+                "%" + searchDTO.getSearchText().toLowerCase() + "%");
 
-        Predicate lastNamePredicate = cb.like(root.get("lastName"),
-                "%" + searchDTO.getSearchText() + "%");
+        Predicate biographyPredicate = cb.like(cb.lower(root.get("biography")),
+                "%" + searchDTO.getSearchText().toLowerCase() + "%");
 
-        Predicate biographyPredicate = cb.like(root.get("biography"),
-                "%" + searchDTO.getSearchText() + "%");
-
-        p.getExpressions().add(cb.or(firstNamePredicate, lastNamePredicate, biographyPredicate));
-
-        return p;
+        return cb.or(firstNamePredicate, lastNamePredicate, biographyPredicate);
     }
 }

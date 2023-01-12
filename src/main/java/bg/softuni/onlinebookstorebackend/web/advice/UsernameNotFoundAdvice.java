@@ -1,21 +1,25 @@
 package bg.softuni.onlinebookstorebackend.web.advice;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.servlet.ModelAndView;
+
+import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @ControllerAdvice
 public class UsernameNotFoundAdvice {
     @ExceptionHandler({UsernameNotFoundException.class})
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
-    public ModelAndView onUsernameNotFound(UsernameNotFoundException ex) {
-        ModelAndView modelAndView = new ModelAndView("object-not-found");
-        modelAndView.addObject("title", "User not found");
-        modelAndView.addObject("message", String.format("User with username %s not found", ex.getMessage()));
+    public ResponseEntity<Object> onUsernameNotFound(UsernameNotFoundException ex) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("message", String.format("User %s not found", ex.getMessage()));
 
-        return modelAndView;
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 }

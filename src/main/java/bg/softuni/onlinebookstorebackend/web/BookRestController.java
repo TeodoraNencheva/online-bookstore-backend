@@ -1,24 +1,124 @@
 package bg.softuni.onlinebookstorebackend.web;
 
+import bg.softuni.onlinebookstorebackend.model.dto.book.AddNewBookDTO;
+import bg.softuni.onlinebookstorebackend.model.dto.book.BookDetailsDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.book.BookOverviewDTO;
-import bg.softuni.onlinebookstorebackend.model.error.AuthorNotFoundException;
+import bg.softuni.onlinebookstorebackend.model.dto.search.SearchDTO;
+import bg.softuni.onlinebookstorebackend.model.entity.BookEntity;
+import bg.softuni.onlinebookstorebackend.model.error.BookNotFoundException;
+import bg.softuni.onlinebookstorebackend.service.AuthorService;
 import bg.softuni.onlinebookstorebackend.service.BookService;
+import bg.softuni.onlinebookstorebackend.service.GenreService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.validation.Valid;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin("*")
 @RestController
 @RequestMapping("/api/books")
 public class BookRestController {
     private final BookService bookService;
+    private final AuthorService authorService;
+    private final GenreService genreService;
 
-    public BookRestController(BookService bookService) {
+    public BookRestController(BookService bookService, AuthorService authorService, GenreService genreService) {
         this.bookService = bookService;
+        this.authorService = authorService;
+        this.genreService = genreService;
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<Page<BookOverviewDTO>> getAllBooks(
+            @RequestParam(value = "size", defaultValue = "5") int size,
+            @RequestParam(value = "page", defaultValue = "0") int page) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("title").ascending());
+
+        return ResponseEntity.ok(bookService.getAllBooks(pageable));
+    }
+
+    @GetMapping("/{genre}")
+    public ResponseEntity<Page<BookOverviewDTO>> getBooksByGenre(@PathVariable("genre") String genre,
+                                                                 @RequestParam(value = "size", defaultValue = "5") int size,
+                                                                 @RequestParam(value = "page", defaultValue = "0") int page) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("title").ascending());
+
+        return ResponseEntity.ok(bookService.getBooksByGenre(genre, pageable));
+    }
+
+    @GetMapping("/{id}/details")
+    public ResponseEntity<BookDetailsDTO> getBookDetails(@PathVariable("id") Long id, Model model) {
+        BookDetailsDTO bookDetails = bookService.getBookDetails(id);
+        if (bookDetails == null) {
+            throw new BookNotFoundException(id);
+        }
+
+        return ResponseEntity.ok(bookDetails);
+    }
+
+    @PostMapping(path = "/add", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<BookEntity> addBook(@Valid @RequestPart AddNewBookDTO bookModel,
+                                              @RequestPart(required = false) MultipartFile picture) throws IOException {
+        bookModel.setPicture(picture);
+        BookEntity newBook = this.bookService.addNewBook(bookModel);
+
+        return ResponseEntity.ok(newBook);
+    }
+
+    @PutMapping(path = "/{id}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<BookEntity> updateBook(@Valid @RequestPart AddNewBookDTO bookModel,
+                                                 @RequestPart(required = false) MultipartFile picture,
+                                                 @PathVariable("id") Long id) throws IOException {
+        bookModel.setPicture(picture);
+
+        BookEntity updatedBook = this.bookService.updateBook(bookModel, id);
+        if (updatedBook == null) {
+            throw new BookNotFoundException(id);
+        }
+
+        return ResponseEntity.ok(updatedBook);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> deleteBook(@PathVariable("id") Long id) {
+        if (bookService.getBookById(id) == null) {
+            throw new BookNotFoundException(id);
+        }
+
+        bookService.deleteBook(id);
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("message", String.format("Book with ID %s deleted", id));
+
+        return new ResponseEntity<>(body, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/search", consumes = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<List<BookOverviewDTO>> search(@RequestBody SearchDTO searchDTO) {
+
+        if (searchDTO.getSearchText() != null && !searchDTO.getSearchText().trim().isEmpty()) {
+            return ResponseEntity.ok(bookService.searchBooks(searchDTO));
+        }
+
+        return ResponseEntity.badRequest().build();
     }
 
     @Tag(name = "Get books by author", description = "Returns all books by a given author ID")
@@ -30,10 +130,5 @@ public class BookRestController {
     public ResponseEntity<List<BookOverviewDTO>> getBooksByAuthor(
             @RequestParam(value = "authorId") Long authorId) {
         return ResponseEntity.ok(bookService.getBooksByAuthor(authorId));
-    }
-
-    @ExceptionHandler({AuthorNotFoundException.class})
-    public ResponseEntity<String> onAuthorNotFound(AuthorNotFoundException ex) {
-        return ResponseEntity.status(404).body(String.format("Author with id %d does not exist", ex.getId()));
     }
 }

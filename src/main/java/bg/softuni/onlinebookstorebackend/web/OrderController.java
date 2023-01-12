@@ -1,21 +1,25 @@
 package bg.softuni.onlinebookstorebackend.web;
 
+import bg.softuni.onlinebookstorebackend.model.dto.order.OrderListDTO;
 import bg.softuni.onlinebookstorebackend.model.error.OrderNotFoundException;
 import bg.softuni.onlinebookstorebackend.service.OrderService;
 import bg.softuni.onlinebookstorebackend.user.BookstoreUserDetails;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 
+import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
-@Controller
-@RequestMapping("/orders")
+@CrossOrigin("*")
+@RestController
+@RequestMapping("/api/orders")
 public class OrderController {
     private final OrderService orderService;
 
@@ -23,59 +27,62 @@ public class OrderController {
         this.orderService = orderService;
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("/processed")
-    public String getProcessedOrders(Model model) {
-        model.addAttribute("type", "Processed");
-        model.addAttribute("orders", orderService.getProcessedOrders());
-        return "orders";
+    public ResponseEntity<List<OrderListDTO>> getProcessedOrders() {
+        return ResponseEntity.ok(orderService.getProcessedOrders());
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("/unprocessed")
-    public String getUnprocessedOrders(Model model) {
-        model.addAttribute("type", "Unprocessed");
-        model.addAttribute("orders", orderService.getUnprocessedOrders());
-
-        return "orders";
+    public ResponseEntity<List<OrderListDTO>> getUnprocessedOrders() {
+        return ResponseEntity.ok(orderService.getUnprocessedOrders());
     }
 
 
     //@PreAuthorize("@orderService.isOwner(#principal.username, #id) or #principal.admin")
     @PreAuthorize("isOwner(#id)")
     @GetMapping("/{id}/details")
-    public String getOrderDetails(@PathVariable("id") UUID id, Model model,
+    public ResponseEntity<Object> getOrderDetails(@PathVariable("id") UUID id,
                                   @AuthenticationPrincipal BookstoreUserDetails principal) {
-        model.addAttribute("order", orderService.getOrder(id));
-        model.addAttribute("items", orderService.getOrderItems(id));
-        return "order-details";
+        Map<Long, Integer> orderItems = orderService.getOrderItems(id);
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("orderId", id);
+        body.put("items", orderItems);
+        return ResponseEntity.ok(body);
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping("/{id}/confirm")
-    public String confirmOrder(@PathVariable("id") UUID id) {
+    public ResponseEntity<Object> confirmOrder(@PathVariable("id") UUID id) {
         orderService.confirmOrder(id);
-        return "redirect:/orders/unprocessed";
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("message", String.format("Order %s confirmed", id));
+
+        return new ResponseEntity<>(body, HttpStatus.OK);
     }
 
     @GetMapping("/mine")
-    public String getMyOrders(@AuthenticationPrincipal UserDetails userDetails,
-                              Model model) {
-        model.addAttribute("type", "My");
-        model.addAttribute("orders", orderService.getLoggedUserOrders(userDetails));
-        return "orders";
+    public ResponseEntity<List<OrderListDTO>> getMyOrders(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(orderService.getLoggedUserOrders(userDetails));
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("/statistics")
-    public String getOrdersStatistics(Model model) {
-        model.addAttribute("count", orderService.getNewOrdersCount());
-        return "orders-statistics";
+    public ResponseEntity<Integer> getOrdersStatistics() {
+        return ResponseEntity.ok(orderService.getNewOrdersCount());
     }
 
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
     @ExceptionHandler({OrderNotFoundException.class})
-    public ModelAndView onOrderNotFound(OrderNotFoundException ex) {
-        ModelAndView modelAndView = new ModelAndView("object-not-found");
-        modelAndView.addObject("title", "Order not found");
-        modelAndView.addObject("message", String.format("Order with id %s not found", ex.getId()));
+    public ResponseEntity<Object> onOrderNotFound(OrderNotFoundException ex) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("message", String.format("Order %s not found", ex.getId()));
 
-        return modelAndView;
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 }

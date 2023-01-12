@@ -10,15 +10,11 @@ import bg.softuni.onlinebookstorebackend.model.mapper.OrderMapper;
 import bg.softuni.onlinebookstorebackend.repositories.OrderRepository;
 import bg.softuni.onlinebookstorebackend.repositories.UserRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -75,11 +71,17 @@ public class OrderService {
     }
 
     @Transactional
-    public Map<BookEntity, Integer> getOrderItems(UUID id) {
-        return getOrder(id).getItems();
+    public Map<Long, Integer> getOrderItems(UUID id) {
+        Map<BookEntity, Integer> items = getOrder(id).getItems();
+        Map<Long, Integer> result = new LinkedHashMap<>();
+
+        for (BookEntity bookEntity : items.keySet()) {
+            result.put(bookEntity.getId(), items.get(bookEntity));
+        }
+
+        return result;
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public void confirmOrder(UUID id) {
         OrderEntity order = getOrder(id);
         order.setProcessed(true);
@@ -88,6 +90,10 @@ public class OrderService {
 
 
     public List<OrderListDTO> getLoggedUserOrders(UserDetails userDetails) {
+        if (userDetails == null) {
+            throw new UsernameNotFoundException("");
+        }
+
         return orderRepository.getAllByOwner_Email(userDetails.getUsername())
                 .stream().map(orderMapper::orderEntityToOrderListDTO)
                 .collect(Collectors.toList());
