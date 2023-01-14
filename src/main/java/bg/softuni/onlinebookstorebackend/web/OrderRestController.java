@@ -20,10 +20,10 @@ import java.util.UUID;
 @CrossOrigin("*")
 @RestController
 @RequestMapping("/api/orders")
-public class OrderController {
+public class OrderRestController {
     private final OrderService orderService;
 
-    public OrderController(OrderService orderService) {
+    public OrderRestController(OrderService orderService) {
         this.orderService = orderService;
     }
 

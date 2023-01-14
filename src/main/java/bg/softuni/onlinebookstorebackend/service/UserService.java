@@ -190,7 +190,6 @@ public class UserService {
         return userOpt.get();
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public void addNewAdmin(String username) {
         Optional<UserEntity> userOpt = userRepository.findByEmail(username);
         if (userOpt.isEmpty()) {
