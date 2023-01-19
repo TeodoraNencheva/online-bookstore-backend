@@ -1,6 +1,8 @@
 package bg.softuni.onlinebookstorebackend.service;
 
 import bg.softuni.onlinebookstorebackend.model.dto.book.AddBookToCartDTO;
+import bg.softuni.onlinebookstorebackend.model.dto.response.AuthenticationResponse;
+import bg.softuni.onlinebookstorebackend.model.dto.user.LoginDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.user.UserOverviewDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.user.UserRegistrationDTO;
 import bg.softuni.onlinebookstorebackend.model.email.AccountVerificationEmailContext;
@@ -21,6 +23,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -48,6 +51,8 @@ public class UserService {
     private final SecureTokenService secureTokenService;
     private final SecureTokenRepository secureTokenRepository;
     private final EmailService emailService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
     @Value("${site.base.url}")
     private String baseURL;
@@ -107,6 +112,20 @@ public class UserService {
         SecurityContextHolder.
                 getContext().
                 setAuthentication(auth);
+    }
+
+    public AuthenticationResponse authenticate(LoginDTO loginDTO) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginDTO.getUsername(),
+                        loginDTO.getPassword()));
+
+        var user = userRepository.findByEmail(loginDTO.getUsername())
+                .orElseThrow();
+        var jwtToken = jwtService.generateToken(userDetailsService.loadUserByUsername(user.getEmail()));
+        return AuthenticationResponse.builder()
+                .token(jwtToken)
+                .build();
     }
 
     @PreAuthorize("hasAuthority('ROLE_USER')")

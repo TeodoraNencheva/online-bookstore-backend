@@ -3,11 +3,11 @@ package bg.softuni.onlinebookstorebackend.web;
 import bg.softuni.onlinebookstorebackend.model.dto.book.AddNewBookDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.book.BookDetailsDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.book.BookOverviewDTO;
-import bg.softuni.onlinebookstorebackend.model.dto.response.GeneralResponse;
 import bg.softuni.onlinebookstorebackend.model.dto.search.SearchDTO;
 import bg.softuni.onlinebookstorebackend.model.entity.BookEntity;
 import bg.softuni.onlinebookstorebackend.model.error.BookNotFoundException;
 import bg.softuni.onlinebookstorebackend.service.BookService;
+import bg.softuni.onlinebookstorebackend.service.ResponseService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,6 +26,7 @@ import jakarta.validation.Valid;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin("*")
 @RestController
@@ -86,14 +87,14 @@ public class BookRestController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<GeneralResponse> deleteBook(@PathVariable("id") Long id) {
+    public ResponseEntity<Object> deleteBook(@PathVariable("id") Long id) {
         if (bookService.getBookById(id) == null) {
             throw new BookNotFoundException(id);
         }
 
         bookService.deleteBook(id);
 
-        GeneralResponse body = new GeneralResponse(String.format("Book with ID %s deleted", id));
+        Map<String, Object> body = ResponseService.generateGeneralResponse(String.format("Book with ID %s deleted", id));
         return new ResponseEntity<>(body, HttpStatus.OK);
     }
 

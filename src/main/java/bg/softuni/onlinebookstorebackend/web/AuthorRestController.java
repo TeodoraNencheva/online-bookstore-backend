@@ -3,11 +3,11 @@ package bg.softuni.onlinebookstorebackend.web;
 import bg.softuni.onlinebookstorebackend.model.dto.author.AddNewAuthorDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.author.AuthorDetailsDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.author.AuthorOverviewDTO;
-import bg.softuni.onlinebookstorebackend.model.dto.response.GeneralResponse;
 import bg.softuni.onlinebookstorebackend.model.dto.search.SearchDTO;
 import bg.softuni.onlinebookstorebackend.model.entity.AuthorEntity;
 import bg.softuni.onlinebookstorebackend.model.error.AuthorNotFoundException;
 import bg.softuni.onlinebookstorebackend.service.AuthorService;
+import bg.softuni.onlinebookstorebackend.service.ResponseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin("*")
 @RestController
@@ -74,15 +75,14 @@ public class AuthorRestController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<GeneralResponse> deleteAuthor(@PathVariable("id") Long id) {
+    public ResponseEntity<Object> deleteAuthor(@PathVariable("id") Long id) {
         if (authorService.getAuthorById(id) == null) {
             throw new AuthorNotFoundException(id);
         }
 
         authorService.deleteAuthor(id);
 
-        GeneralResponse body = new GeneralResponse(String.format("Author with ID %s deleted", id));
-
+        Map<String, Object> body = ResponseService.generateGeneralResponse(String.format("Author with ID %s deleted", id));
         return new ResponseEntity<>(body, HttpStatus.OK);
     }
 

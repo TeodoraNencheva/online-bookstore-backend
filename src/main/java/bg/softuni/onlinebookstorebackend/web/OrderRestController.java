@@ -1,9 +1,9 @@
 package bg.softuni.onlinebookstorebackend.web;
 
 import bg.softuni.onlinebookstorebackend.model.dto.order.OrderListDTO;
-import bg.softuni.onlinebookstorebackend.model.dto.response.GeneralResponse;
 import bg.softuni.onlinebookstorebackend.model.error.OrderNotFoundException;
 import bg.softuni.onlinebookstorebackend.service.OrderService;
+import bg.softuni.onlinebookstorebackend.service.ResponseService;
 import bg.softuni.onlinebookstorebackend.user.BookstoreUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -53,10 +53,10 @@ public class OrderRestController {
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping("/{id}/confirm")
-    public ResponseEntity<GeneralResponse> confirmOrder(@PathVariable("id") UUID id) {
+    public ResponseEntity<Object> confirmOrder(@PathVariable("id") UUID id) {
         orderService.confirmOrder(id);
 
-        GeneralResponse body = new GeneralResponse(String.format("Order %s confirmed", id));
+        Map<String, Object> body = ResponseService.generateGeneralResponse(String.format("Order %s confirmed", id));
         return new ResponseEntity<>(body, HttpStatus.OK);
     }
 
@@ -73,8 +73,8 @@ public class OrderRestController {
 
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
     @ExceptionHandler({OrderNotFoundException.class})
-    public ResponseEntity<GeneralResponse> onOrderNotFound(OrderNotFoundException ex) {
-        GeneralResponse body = new GeneralResponse(String.format("Order %s not found", ex.getId()));
+    public ResponseEntity<Object> onOrderNotFound(OrderNotFoundException ex) {
+        Map<String, Object> body = ResponseService.generateGeneralResponse(String.format("Order %s not found", ex.getId()));
 
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }

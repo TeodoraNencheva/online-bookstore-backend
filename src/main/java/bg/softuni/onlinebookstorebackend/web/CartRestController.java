@@ -2,10 +2,10 @@ package bg.softuni.onlinebookstorebackend.web;
 
 import bg.softuni.onlinebookstorebackend.model.dto.book.AddBookToCartDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.book.BookAddedToCartDTO;
-import bg.softuni.onlinebookstorebackend.model.dto.response.GeneralResponse;
 import bg.softuni.onlinebookstorebackend.model.error.EmptyCartException;
 import bg.softuni.onlinebookstorebackend.service.BookService;
 import bg.softuni.onlinebookstorebackend.service.OrderService;
+import bg.softuni.onlinebookstorebackend.service.ResponseService;
 import bg.softuni.onlinebookstorebackend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -42,36 +42,36 @@ public class CartRestController {
     }
 
     @DeleteMapping("/{id}/remove")
-    public ResponseEntity<GeneralResponse> removeItem(@PathVariable("id") Long bookId,
-                                             @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Object> removeItem(@PathVariable("id") Long bookId,
+                                                      @AuthenticationPrincipal UserDetails userDetails) {
         userService.removeItemFromCart(bookId, userDetails);
 
-        GeneralResponse body = new GeneralResponse(
+        Map<String, Object> body = ResponseService.generateGeneralResponse(
                 String.format("Book with ID %s removed from cart", bookId));
 
         return new ResponseEntity<>(body, HttpStatus.OK);
     }
 
     @DeleteMapping("/removeAll")
-    public ResponseEntity<GeneralResponse> removeAllItems(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Object> removeAllItems(@AuthenticationPrincipal UserDetails userDetails) {
         userService.removeAllItemsFromCart(userDetails);
 
-        GeneralResponse body = new GeneralResponse("All books removed from cart.");
+        Map<String, Object> body = ResponseService.generateGeneralResponse("All books removed from cart.");
         return new ResponseEntity<>(body, HttpStatus.OK);
     }
 
     @PostMapping("/confirm")
-    public ResponseEntity<GeneralResponse> confirmOrder(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Object> confirmOrder(@AuthenticationPrincipal UserDetails userDetails) {
         orderService.createNewOrder(userDetails);
 
-        GeneralResponse body = new GeneralResponse("New order created.");
+        Map<String, Object> body = ResponseService.generateGeneralResponse("New order created.");
         return new ResponseEntity<>(body, HttpStatus.OK);
     }
 
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     @ExceptionHandler({EmptyCartException.class})
-    public ResponseEntity<GeneralResponse> onEmptyCart(EmptyCartException ex) {
-        GeneralResponse body = new GeneralResponse(ex.getMessage());
+    public ResponseEntity<Object> onEmptyCart(EmptyCartException ex) {
+        Map<String, Object> body = ResponseService.generateGeneralResponse(ex.getMessage());
 
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }

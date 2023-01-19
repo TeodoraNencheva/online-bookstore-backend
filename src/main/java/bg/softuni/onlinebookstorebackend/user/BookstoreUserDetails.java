@@ -1,5 +1,6 @@
 package bg.softuni.onlinebookstorebackend.user;
 
+import bg.softuni.onlinebookstorebackend.model.entity.UserEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
