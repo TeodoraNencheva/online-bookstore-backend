@@ -28,7 +28,6 @@ public class UserRestController {
     @PostMapping(path = "/login", consumes = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<AuthenticationResponse> authenticateUser(@RequestBody LoginDTO loginDTO) {
 
-        //userService.login(loginDTO.getUsername());
         return ResponseEntity.ok(userService.authenticate(loginDTO));
     }
 

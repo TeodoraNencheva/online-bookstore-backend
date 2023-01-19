@@ -30,7 +30,7 @@ public class UserRegistrationDTO {
     private String lastName;
 
     @NotEmpty
-    @Size(min = 5)
+    @Size(min = 5, message = "Password should be 5 or more characters long.")
     private String password;
 
     private String confirmPassword;
