@@ -1,52 +1,58 @@
 package bg.softuni.onlinebookstorebackend.web;
 
+import bg.softuni.onlinebookstorebackend.model.dto.response.GeneralResponse;
+import bg.softuni.onlinebookstorebackend.model.dto.user.LoginDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.user.UserOverviewDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.user.UserRegistrationDTO;
 import bg.softuni.onlinebookstorebackend.service.UserService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 @CrossOrigin("*")
 @RestController
-@RequestMapping("/api/users")
+@RequiredArgsConstructor
+@RequestMapping("/api/auth")
 public class UserRestController {
     private final UserService userService;
     private final MessageSource messageSource;
+    private final AuthenticationManager authenticationManager;
 
-    public UserRestController(UserService userService, MessageSource messageSource) {
-        this.userService = userService;
-        this.messageSource = messageSource;
+    @PostMapping(path = "/login", consumes = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<GeneralResponse> authenticateUser(@RequestBody LoginDTO loginDTO) {
+
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword()));
+
+        userService.login(loginDTO.getUsername());
+
+        GeneralResponse body = new GeneralResponse(
+                String.format("User %s signed-in successfully!", loginDTO.getUsername()));
+        return ResponseEntity.ok().body(body);
     }
 
     @PostMapping(path = "/register", consumes = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Object> register(@Valid @RequestBody UserRegistrationDTO userModel) {
+    public ResponseEntity<GeneralResponse> register(@Valid @RequestBody UserRegistrationDTO userModel) {
 
         this.userService.register(userModel);
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("message", String.format("User %s successfully registered", userModel.getEmail()));
-
+        GeneralResponse body = new GeneralResponse(
+                String.format("User %s successfully registered", userModel.getEmail()));
         return new ResponseEntity<>(body, HttpStatus.OK);
     }
 
     @GetMapping("/register/verify")
-    public ResponseEntity<Object> verifyAccount(@RequestParam(required = false) String token) {
+    public ResponseEntity<GeneralResponse> verifyAccount(@RequestParam(required = false) String token) {
         if (token == null) {
-            Map<String, Object> body = new LinkedHashMap<>();
-            body.put("timestamp", LocalDateTime.now());
-            body.put("message", messageSource
+            GeneralResponse body = new GeneralResponse(messageSource
                     .getMessage("user.registration.verification.missing.token",
                             null,
                             LocaleContextHolder.getLocale()));
@@ -56,11 +62,10 @@ public class UserRestController {
 
         userService.verifyUser(token);
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("message", messageSource.getMessage("user.registration.verification.success",
-                null,
-                LocaleContextHolder.getLocale()));
+        GeneralResponse body = new GeneralResponse(messageSource
+                .getMessage("user.registration.verification.success",
+                        null,
+                        LocaleContextHolder.getLocale()));
 
         return new ResponseEntity<>(body, HttpStatus.OK);
     }
@@ -72,13 +77,10 @@ public class UserRestController {
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping("/addAdmin/{username}")
-    public ResponseEntity<Object> addNewAdmin(@PathVariable("username") String username) {
+    public ResponseEntity<GeneralResponse> addNewAdmin(@PathVariable("username") String username) {
         userService.addNewAdmin(username);
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("message", String.format("User %s added as admin", username));
-
+        GeneralResponse body = new GeneralResponse(String.format("User %s added as admin", username));
         return new ResponseEntity<>(body, HttpStatus.OK);
     }
 

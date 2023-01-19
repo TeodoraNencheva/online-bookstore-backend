@@ -1,9 +1,11 @@
 package bg.softuni.onlinebookstorebackend.web;
 
 import bg.softuni.onlinebookstorebackend.model.dto.order.OrderListDTO;
+import bg.softuni.onlinebookstorebackend.model.dto.response.GeneralResponse;
 import bg.softuni.onlinebookstorebackend.model.error.OrderNotFoundException;
 import bg.softuni.onlinebookstorebackend.service.OrderService;
 import bg.softuni.onlinebookstorebackend.user.BookstoreUserDetails;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -11,7 +13,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,13 +20,10 @@ import java.util.UUID;
 
 @CrossOrigin("*")
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/orders")
 public class OrderRestController {
     private final OrderService orderService;
-
-    public OrderRestController(OrderService orderService) {
-        this.orderService = orderService;
-    }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("/processed")
@@ -55,13 +53,10 @@ public class OrderRestController {
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping("/{id}/confirm")
-    public ResponseEntity<Object> confirmOrder(@PathVariable("id") UUID id) {
+    public ResponseEntity<GeneralResponse> confirmOrder(@PathVariable("id") UUID id) {
         orderService.confirmOrder(id);
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("message", String.format("Order %s confirmed", id));
-
+        GeneralResponse body = new GeneralResponse(String.format("Order %s confirmed", id));
         return new ResponseEntity<>(body, HttpStatus.OK);
     }
 
@@ -78,10 +73,8 @@ public class OrderRestController {
 
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
     @ExceptionHandler({OrderNotFoundException.class})
-    public ResponseEntity<Object> onOrderNotFound(OrderNotFoundException ex) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("message", String.format("Order %s not found", ex.getId()));
+    public ResponseEntity<GeneralResponse> onOrderNotFound(OrderNotFoundException ex) {
+        GeneralResponse body = new GeneralResponse(String.format("Order %s not found", ex.getId()));
 
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }

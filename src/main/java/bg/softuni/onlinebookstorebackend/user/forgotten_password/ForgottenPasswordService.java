@@ -10,6 +10,7 @@ import bg.softuni.onlinebookstorebackend.service.EmailService;
 import bg.softuni.onlinebookstorebackend.service.SecureTokenService;
 import bg.softuni.onlinebookstorebackend.service.UserService;
 import jakarta.mail.MessagingException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ForgottenPasswordService {
     private final UserService userService;
     private final SecureTokenService secureTokenService;
@@ -28,15 +30,6 @@ public class ForgottenPasswordService {
 
     @Value("${site.base.url}")
     private String baseURL;
-
-    public ForgottenPasswordService(UserService userService, SecureTokenService secureTokenService, SecureTokenRepository secureTokenRepository, EmailService emailService, UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userService = userService;
-        this.secureTokenService = secureTokenService;
-        this.secureTokenRepository = secureTokenRepository;
-        this.emailService = emailService;
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     public void forgottenPassword(String email) {
         UserEntity user = userService.getUser(email);

@@ -1,6 +1,8 @@
 package bg.softuni.onlinebookstorebackend.config;
 
 import bg.softuni.onlinebookstorebackend.service.OrderService;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
 import org.springframework.security.core.Authentication;
@@ -12,9 +14,14 @@ public class OwnerSecurityExpressionRoot extends SecurityExpressionRoot
 
     private final Authentication authentication;
     private final OrderService orderService;
-    private Object filterObject;
-    private Object returnObject;
 
+    @Getter
+    @Setter
+    private Object filterObject;
+
+    @Getter
+    @Setter
+    private Object returnObject;
 
     public OwnerSecurityExpressionRoot(Authentication authentication, OrderService orderService) {
         super(authentication);
@@ -30,26 +37,6 @@ public class OwnerSecurityExpressionRoot extends SecurityExpressionRoot
         String username = authentication.getName();
 
         return orderService.isOwner(username, id) || hasAuthority("ROLE_ADMIN");
-    }
-
-    @Override
-    public void setFilterObject(Object filterObject) {
-        this.filterObject = filterObject;
-    }
-
-    @Override
-    public Object getFilterObject() {
-        return filterObject;
-    }
-
-    @Override
-    public void setReturnObject(Object returnObject) {
-        this.returnObject = returnObject;
-    }
-
-    @Override
-    public Object getReturnObject() {
-        return returnObject;
     }
 
     @Override

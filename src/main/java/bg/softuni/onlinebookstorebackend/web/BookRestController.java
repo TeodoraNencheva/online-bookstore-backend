@@ -3,15 +3,15 @@ package bg.softuni.onlinebookstorebackend.web;
 import bg.softuni.onlinebookstorebackend.model.dto.book.AddNewBookDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.book.BookDetailsDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.book.BookOverviewDTO;
+import bg.softuni.onlinebookstorebackend.model.dto.response.GeneralResponse;
 import bg.softuni.onlinebookstorebackend.model.dto.search.SearchDTO;
 import bg.softuni.onlinebookstorebackend.model.entity.BookEntity;
 import bg.softuni.onlinebookstorebackend.model.error.BookNotFoundException;
-import bg.softuni.onlinebookstorebackend.service.AuthorService;
 import bg.softuni.onlinebookstorebackend.service.BookService;
-import bg.softuni.onlinebookstorebackend.service.GenreService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,31 +19,20 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 @CrossOrigin("*")
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/books")
 public class BookRestController {
     private final BookService bookService;
-    private final AuthorService authorService;
-    private final GenreService genreService;
-
-    public BookRestController(BookService bookService, AuthorService authorService, GenreService genreService) {
-        this.bookService = bookService;
-        this.authorService = authorService;
-        this.genreService = genreService;
-    }
 
     @GetMapping("/all")
     public ResponseEntity<Page<BookOverviewDTO>> getAllBooks(
@@ -64,7 +53,7 @@ public class BookRestController {
     }
 
     @GetMapping("/{id}/details")
-    public ResponseEntity<BookDetailsDTO> getBookDetails(@PathVariable("id") Long id, Model model) {
+    public ResponseEntity<BookDetailsDTO> getBookDetails(@PathVariable("id") Long id) {
         BookDetailsDTO bookDetails = bookService.getBookDetails(id);
         if (bookDetails == null) {
             throw new BookNotFoundException(id);
@@ -97,17 +86,14 @@ public class BookRestController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteBook(@PathVariable("id") Long id) {
+    public ResponseEntity<GeneralResponse> deleteBook(@PathVariable("id") Long id) {
         if (bookService.getBookById(id) == null) {
             throw new BookNotFoundException(id);
         }
 
         bookService.deleteBook(id);
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("message", String.format("Book with ID %s deleted", id));
-
+        GeneralResponse body = new GeneralResponse(String.format("Book with ID %s deleted", id));
         return new ResponseEntity<>(body, HttpStatus.OK);
     }
 

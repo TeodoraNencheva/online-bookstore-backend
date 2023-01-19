@@ -4,6 +4,7 @@ import bg.softuni.onlinebookstorebackend.model.error.InvalidTokenException;
 import bg.softuni.onlinebookstorebackend.user.forgotten_password.ForgottenPasswordService;
 import bg.softuni.onlinebookstorebackend.user.forgotten_password.ResetPasswordData;
 import bg.softuni.onlinebookstorebackend.user.forgotten_password.ResetPasswordEmailDTO;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,17 +17,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.validation.Valid;
 
 @Controller
+@RequiredArgsConstructor
 @RequestMapping("/password")
 public class PasswordResetController {
     private final static String REDIRECT_LOGIN = "redirect:/users/login";
 
     private final MessageSource messageSource;
     private final ForgottenPasswordService passwordService;
-
-    public PasswordResetController(MessageSource messageSource, ForgottenPasswordService passwordService) {
-        this.messageSource = messageSource;
-        this.passwordService = passwordService;
-    }
 
     @ModelAttribute("emailDTO")
     public ResetPasswordEmailDTO initEmail() {

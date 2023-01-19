@@ -2,6 +2,7 @@ package bg.softuni.onlinebookstorebackend.repositories;
 
 import bg.softuni.onlinebookstorebackend.model.dto.search.SearchDTO;
 import bg.softuni.onlinebookstorebackend.model.entity.AuthorEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -9,12 +10,9 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
+@RequiredArgsConstructor
 public class AuthorSpecification implements Specification<AuthorEntity> {
     private final SearchDTO searchDTO;
-
-    public AuthorSpecification(SearchDTO searchDTO) {
-        this.searchDTO = searchDTO;
-    }
 
     @Override
     public Predicate toPredicate(Root<AuthorEntity> root,

@@ -10,6 +10,7 @@ import bg.softuni.onlinebookstorebackend.model.mapper.OrderMapper;
 import bg.softuni.onlinebookstorebackend.repositories.OrderRepository;
 import bg.softuni.onlinebookstorebackend.repositories.UserRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -18,17 +19,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
     private final UserRepository userRepository;
     private int newOrdersCount = 0;
-
-    public OrderService(OrderRepository orderRepository, OrderMapper orderMapper, UserRepository userRepository) {
-        this.orderRepository = orderRepository;
-        this.orderMapper = orderMapper;
-        this.userRepository = userRepository;
-    }
 
     public int getNewOrdersCount() {
         return newOrdersCount;

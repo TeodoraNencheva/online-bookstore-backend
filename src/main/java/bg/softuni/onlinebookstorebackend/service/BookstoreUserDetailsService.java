@@ -4,29 +4,29 @@ import bg.softuni.onlinebookstorebackend.model.entity.UserEntity;
 import bg.softuni.onlinebookstorebackend.model.entity.UserRoleEntity;
 import bg.softuni.onlinebookstorebackend.repositories.UserRepository;
 import bg.softuni.onlinebookstorebackend.user.BookstoreUserDetails;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Service
+@RequiredArgsConstructor
 public class BookstoreUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
-
-    public BookstoreUserDetailsService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 
     @Override
     public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
         Optional<UserEntity> userOpt = userRepository.findByEmail(username);
         if (userOpt.isEmpty()) {
-            throw new UsernameNotFoundException("User with email " + username + " not found!");
+            throw new UsernameNotFoundException(username);
         }
 
         return this.map(userOpt.get());

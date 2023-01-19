@@ -11,6 +11,7 @@ import bg.softuni.onlinebookstorebackend.model.error.BookNotFoundException;
 import bg.softuni.onlinebookstorebackend.model.error.GenreNotFoundException;
 import bg.softuni.onlinebookstorebackend.model.mapper.BookMapper;
 import bg.softuni.onlinebookstorebackend.repositories.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +23,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class BookService {
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
@@ -29,16 +31,6 @@ public class BookService {
     private final BookMapper bookMapper;
     private final CloudinaryService cloudinaryService;
     private final PictureRepository pictureRepository;
-
-    public BookService(BookRepository bookRepository, AuthorRepository authorRepository, GenreRepository genreRepository, BookMapper bookMapper, CloudinaryService cloudinaryService, PictureRepository pictureRepository) {
-        this.bookRepository = bookRepository;
-        this.authorRepository = authorRepository;
-        this.genreRepository = genreRepository;
-        this.bookMapper = bookMapper;
-        this.cloudinaryService = cloudinaryService;
-
-        this.pictureRepository = pictureRepository;
-    }
 
     public BookDetailsDTO getBookDetails(Long id) {
         Optional<BookEntity> bookOpt = bookRepository.findById(id);

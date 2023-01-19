@@ -3,6 +3,8 @@ package bg.softuni.onlinebookstorebackend.user.forgotten_password;
 import bg.softuni.onlinebookstorebackend.model.validation.FieldMatch;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 
 
 @FieldMatch(
@@ -10,6 +12,8 @@ import jakarta.validation.constraints.Size;
         second = "confirmPassword",
         message = "Passwords do not match."
 )
+@Getter
+@Setter
 public class ResetPasswordData {
     private String token;
 
@@ -18,27 +22,4 @@ public class ResetPasswordData {
     private String password;
     private String confirmPassword;
 
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getConfirmPassword() {
-        return confirmPassword;
-    }
-
-    public void setConfirmPassword(String confirmPassword) {
-        this.confirmPassword = confirmPassword;
-    }
 }

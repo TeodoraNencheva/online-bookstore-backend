@@ -3,11 +3,13 @@ package bg.softuni.onlinebookstorebackend.web;
 import bg.softuni.onlinebookstorebackend.model.dto.author.AddNewAuthorDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.author.AuthorDetailsDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.author.AuthorOverviewDTO;
+import bg.softuni.onlinebookstorebackend.model.dto.response.GeneralResponse;
 import bg.softuni.onlinebookstorebackend.model.dto.search.SearchDTO;
 import bg.softuni.onlinebookstorebackend.model.entity.AuthorEntity;
 import bg.softuni.onlinebookstorebackend.model.error.AuthorNotFoundException;
 import bg.softuni.onlinebookstorebackend.service.AuthorService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,20 +21,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 @CrossOrigin("*")
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/authors")
 public class AuthorRestController {
     private final AuthorService authorService;
-
-    public AuthorRestController(AuthorService authorService) {
-        this.authorService = authorService;
-    }
 
     @GetMapping
     public ResponseEntity<Page<AuthorOverviewDTO>> getAllAuthors(
@@ -78,16 +74,14 @@ public class AuthorRestController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteAuthor(@PathVariable("id") Long id) {
+    public ResponseEntity<GeneralResponse> deleteAuthor(@PathVariable("id") Long id) {
         if (authorService.getAuthorById(id) == null) {
             throw new AuthorNotFoundException(id);
         }
 
         authorService.deleteAuthor(id);
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("message", String.format("Author with ID %s deleted", id));
+        GeneralResponse body = new GeneralResponse(String.format("Author with ID %s deleted", id));
 
         return new ResponseEntity<>(body, HttpStatus.OK);
     }
@@ -100,15 +94,5 @@ public class AuthorRestController {
         }
 
         return ResponseEntity.badRequest().build();
-    }
-
-    @ResponseStatus(value = HttpStatus.NOT_FOUND)
-    @ExceptionHandler({AuthorNotFoundException.class})
-    public ResponseEntity<Object> onAuthorNotFound(AuthorNotFoundException ex) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("message", String.format("Author with ID %s not found", ex.getId()));
-
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
 }

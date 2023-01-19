@@ -2,9 +2,17 @@ package bg.softuni.onlinebookstorebackend.model.entity;
 
 import bg.softuni.onlinebookstorebackend.model.dto.book.AddNewBookDTO;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 @Entity
 @Table(name = "books")
 public class BookEntity extends BaseEntity {
@@ -30,19 +38,6 @@ public class BookEntity extends BaseEntity {
     @Column(nullable = false)
     private BigDecimal price;
 
-    public BookEntity() {
-    }
-
-    public BookEntity(String title, AuthorEntity author, GenreEntity genre, String yearOfPublication, String summary, PictureEntity picture, BigDecimal price) {
-        this.title = title;
-        this.author = author;
-        this.genre = genre;
-        this.yearOfPublication = yearOfPublication;
-        this.summary = summary;
-        this.picture = picture;
-        this.price = price;
-    }
-
     public BookEntity(AddNewBookDTO bookDTO, AuthorEntity author, GenreEntity genre,
                       PictureEntity picture) {
         this.title = bookDTO.getTitle();
@@ -52,61 +47,5 @@ public class BookEntity extends BaseEntity {
         this.summary = bookDTO.getSummary();
         this.picture = picture;
         this.price = bookDTO.getPrice();
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public AuthorEntity getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(AuthorEntity author) {
-        this.author = author;
-    }
-
-    public GenreEntity getGenre() {
-        return genre;
-    }
-
-    public void setGenre(GenreEntity genre) {
-        this.genre = genre;
-    }
-
-    public String getYearOfPublication() {
-        return yearOfPublication;
-    }
-
-    public void setYearOfPublication(String yearOfPublication) {
-        this.yearOfPublication = yearOfPublication;
-    }
-
-    public String getSummary() {
-        return summary;
-    }
-
-    public void setSummary(String summary) {
-        this.summary = summary;
-    }
-
-    public PictureEntity getPicture() {
-        return picture;
-    }
-
-    public void setPicture(PictureEntity picture) {
-        this.picture = picture;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
     }
 }

@@ -2,6 +2,7 @@ package bg.softuni.onlinebookstorebackend.service;
 
 import bg.softuni.onlinebookstorebackend.model.cloudinary.CloudinaryImage;
 import com.cloudinary.Cloudinary;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -10,16 +11,13 @@ import java.io.IOException;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class CloudinaryService {
     private static final String TEMP_FILE = "temp-file";
     private static final String URL = "url";
     private static final String PUBLIC_ID = "public_id";
 
     private final Cloudinary cloudinary;
-
-    public CloudinaryService(Cloudinary cloudinary) {
-        this.cloudinary = cloudinary;
-    }
 
     public CloudinaryImage upload(MultipartFile file) throws IOException {
         File tempFile = File.createTempFile(TEMP_FILE, file.getOriginalFilename());

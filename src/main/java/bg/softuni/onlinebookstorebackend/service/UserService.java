@@ -18,6 +18,7 @@ import bg.softuni.onlinebookstorebackend.repositories.UserRepository;
 import bg.softuni.onlinebookstorebackend.repositories.UserRoleRepository;
 import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,6 +37,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
@@ -49,18 +51,6 @@ public class UserService {
 
     @Value("${site.base.url}")
     private String baseURL;
-
-    public UserService(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder, UserDetailsService userDetailsService, UserRoleRepository userRoleRepository, BookRepository bookRepository, SecureTokenService secureTokenService, SecureTokenRepository secureTokenRepository, EmailService emailService) {
-        this.userRepository = userRepository;
-        this.userMapper = userMapper;
-        this.passwordEncoder = passwordEncoder;
-        this.userDetailsService = userDetailsService;
-        this.userRoleRepository = userRoleRepository;
-        this.bookRepository = bookRepository;
-        this.secureTokenService = secureTokenService;
-        this.secureTokenRepository = secureTokenRepository;
-        this.emailService = emailService;
-    }
 
     public void createUserIfNotExists(String email, String name) {
         Optional<UserEntity> userOpt = this.userRepository.findByEmail(email);

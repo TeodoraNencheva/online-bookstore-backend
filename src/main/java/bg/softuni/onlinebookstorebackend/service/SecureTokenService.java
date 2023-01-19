@@ -2,6 +2,7 @@ package bg.softuni.onlinebookstorebackend.service;
 
 import bg.softuni.onlinebookstorebackend.model.entity.SecureTokenEntity;
 import bg.softuni.onlinebookstorebackend.repositories.SecureTokenRepository;
+import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.keygen.BytesKeyGenerator;
@@ -13,15 +14,12 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
 @Service
+@RequiredArgsConstructor
 public class SecureTokenService {
     private static final BytesKeyGenerator DEFAULT_TOKEN_GENERATOR = KeyGenerators.secureRandom(15);
     private static final Charset US_ASCII = StandardCharsets.US_ASCII;
 
     private final SecureTokenRepository secureTokenRepository;
-
-    public SecureTokenService(SecureTokenRepository secureTokenRepository) {
-        this.secureTokenRepository = secureTokenRepository;
-    }
 
     @Value("${secure.token.validity}")
     private int tokenValidityInHours;

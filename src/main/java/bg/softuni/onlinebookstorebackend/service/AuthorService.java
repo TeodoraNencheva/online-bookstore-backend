@@ -13,6 +13,7 @@ import bg.softuni.onlinebookstorebackend.repositories.AuthorSpecification;
 import bg.softuni.onlinebookstorebackend.repositories.BookRepository;
 import bg.softuni.onlinebookstorebackend.repositories.PictureRepository;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,20 +25,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AuthorService {
     private final AuthorRepository authorRepository;
     private final BookRepository bookRepository;
     private final AuthorMapper authorMapper;
     private final PictureRepository pictureRepository;
     private final CloudinaryService cloudinaryService;
-
-    public AuthorService(AuthorRepository authorRepository, BookRepository bookRepository, AuthorMapper authorMapper, PictureRepository pictureRepository, CloudinaryService cloudinaryService) {
-        this.authorRepository = authorRepository;
-        this.bookRepository = bookRepository;
-        this.authorMapper = authorMapper;
-        this.pictureRepository = pictureRepository;
-        this.cloudinaryService = cloudinaryService;
-    }
 
     public Page<AuthorOverviewDTO> getAllAuthors(Pageable pageable) {
         return authorRepository.findAll(pageable).map(authorMapper::authorEntityToAuthorOverviewDTO);

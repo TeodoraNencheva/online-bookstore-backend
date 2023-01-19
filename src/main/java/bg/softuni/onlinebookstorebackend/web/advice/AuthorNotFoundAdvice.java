@@ -1,20 +1,20 @@
 package bg.softuni.onlinebookstorebackend.web.advice;
 
 import bg.softuni.onlinebookstorebackend.model.dto.response.GeneralResponse;
+import bg.softuni.onlinebookstorebackend.model.error.AuthorNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ControllerAdvice
-public class UsernameNotFoundAdvice {
-    @ExceptionHandler({UsernameNotFoundException.class})
+public class AuthorNotFoundAdvice {
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
-    public ResponseEntity<GeneralResponse> onUsernameNotFound(UsernameNotFoundException ex) {
+    @ExceptionHandler({AuthorNotFoundException.class})
+    public ResponseEntity<GeneralResponse> onAuthorNotFound(AuthorNotFoundException ex) {
         GeneralResponse body = new GeneralResponse(
-                String.format("User %s not found", ex.getMessage()));
+                String.format("Author with ID %s not found", ex.getId()));
 
         return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
     }
