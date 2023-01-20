@@ -6,7 +6,7 @@ import io.swagger.v3.oas.models.info.Info;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-public class OpeAPIConfig {
+public class OpenAPIConfiguration {
     @Configuration
     public static class OpenAPIConfig {
 
@@ -14,11 +14,11 @@ public class OpeAPIConfig {
         public OpenAPI openAPI() {
             return new OpenAPI().
                     info(new Info()
-                            .title("Bookstore API")
+                            .title("Online Bookstore API")
                             .version("1.0.0")
                             .contact(new Contact().name("Teodora Nencheva")
                                     .email("teodora.nencheva1@gmail.com"))
-                            .description("Bookstore API"));
+                            .description("Online Bookstore API"));
         }
 
     }
