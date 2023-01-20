@@ -21,7 +21,6 @@ import bg.softuni.onlinebookstorebackend.repositories.UserRoleRepository;
 import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -54,9 +53,6 @@ public class UserService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
-    @Value("${site.base.url}")
-    private String baseURL;
-
     public void createUserIfNotExists(String email, String name) {
         Optional<UserEntity> userOpt = this.userRepository.findByEmail(email);
 
@@ -78,10 +74,10 @@ public class UserService {
         newUser.setPassword(passwordEncoder.encode(userRegistrationDTO.getPassword()));
 
         newUser.addRole(getUserRole());
-        sendRegistrationConfirmationEmail(this.userRepository.save(newUser));
+        sendRegistrationConfirmationEmail(this.userRepository.save(newUser), userRegistrationDTO.getBaseUrl());
     }
 
-    public void sendRegistrationConfirmationEmail(UserEntity user) {
+    public void sendRegistrationConfirmationEmail(UserEntity user, String baseURL) {
         SecureTokenEntity secureToken = secureTokenService.createSecureToken();
         secureToken.setUser(user);
         secureTokenRepository.save(secureToken);

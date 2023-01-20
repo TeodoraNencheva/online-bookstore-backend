@@ -34,4 +34,7 @@ public class UserRegistrationDTO {
     private String password;
 
     private String confirmPassword;
+
+    @NotEmpty(message = "Base URL should be provided.")
+    private String baseUrl;
 }

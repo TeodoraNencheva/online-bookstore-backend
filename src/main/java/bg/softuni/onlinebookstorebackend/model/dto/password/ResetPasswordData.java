@@ -1,4 +1,4 @@
-package bg.softuni.onlinebookstorebackend.user.forgotten_password;
+package bg.softuni.onlinebookstorebackend.model.dto.password;
 
 import bg.softuni.onlinebookstorebackend.model.validation.FieldMatch;
 import jakarta.validation.constraints.NotEmpty;
@@ -17,8 +17,8 @@ import lombok.Setter;
 public class ResetPasswordData {
     private String token;
 
-    @NotEmpty
-    @Size(min = 5)
+    @NotEmpty(message = "Password is required")
+    @Size(min = 5, message = "Password should be at least 5 characters.")
     private String password;
     private String confirmPassword;
 

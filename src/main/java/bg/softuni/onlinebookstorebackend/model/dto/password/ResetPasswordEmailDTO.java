@@ -1,4 +1,4 @@
-package bg.softuni.onlinebookstorebackend.user.forgotten_password;
+package bg.softuni.onlinebookstorebackend.model.dto.password;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -13,4 +13,7 @@ public class ResetPasswordEmailDTO {
     @NotEmpty(message = "User email should be provided.")
     @Email(message = "User email should be valid.")
     private String email;
+
+    @NotEmpty(message = "Base URL should be provided.")
+    private String baseUrl;
 }

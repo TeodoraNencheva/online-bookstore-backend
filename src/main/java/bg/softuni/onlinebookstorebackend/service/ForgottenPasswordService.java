@@ -1,4 +1,4 @@
-package bg.softuni.onlinebookstorebackend.user.forgotten_password;
+package bg.softuni.onlinebookstorebackend.service;
 
 import bg.softuni.onlinebookstorebackend.model.email.ForgotPasswordEmailContext;
 import bg.softuni.onlinebookstorebackend.model.entity.SecureTokenEntity;
@@ -6,12 +6,8 @@ import bg.softuni.onlinebookstorebackend.model.entity.UserEntity;
 import bg.softuni.onlinebookstorebackend.model.error.InvalidTokenException;
 import bg.softuni.onlinebookstorebackend.repositories.SecureTokenRepository;
 import bg.softuni.onlinebookstorebackend.repositories.UserRepository;
-import bg.softuni.onlinebookstorebackend.service.EmailService;
-import bg.softuni.onlinebookstorebackend.service.SecureTokenService;
-import bg.softuni.onlinebookstorebackend.service.UserService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,15 +24,12 @@ public class ForgottenPasswordService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${site.base.url}")
-    private String baseURL;
-
-    public void forgottenPassword(String email) {
+    public void forgottenPassword(String email, String baseUrl) {
         UserEntity user = userService.getUser(email);
-        sendResetPasswordEmail(user);
+        sendResetPasswordEmail(user, baseUrl);
     }
 
-    private void sendResetPasswordEmail(UserEntity user) {
+    private void sendResetPasswordEmail(UserEntity user, String baseUrl) {
         SecureTokenEntity secureToken = secureTokenService.createSecureToken();
         secureToken.setUser(user);
         secureTokenRepository.save(secureToken);
@@ -44,7 +37,7 @@ public class ForgottenPasswordService {
         ForgotPasswordEmailContext emailContext = new ForgotPasswordEmailContext();
         emailContext.init(user);
         emailContext.setToken(secureToken.getToken());
-        emailContext.buildVerificationUrl(baseURL, secureToken.getToken());
+        emailContext.buildVerificationUrl(baseUrl, secureToken.getToken());
 
         try {
             emailService.sendEmail(emailContext);
@@ -57,13 +50,13 @@ public class ForgottenPasswordService {
         Optional<SecureTokenEntity> tokenOpt = secureTokenRepository.findByToken(token);
 
         if (tokenOpt.isEmpty() || tokenOpt.get().isExpired()) {
-            throw new InvalidTokenException("Token is invalid.");
+            throw new InvalidTokenException();
         }
 
         SecureTokenEntity secureToken = tokenOpt.get();
         UserEntity user = secureToken.getUser();
         if (user == null) {
-            throw new UsernameNotFoundException("User not found");
+            throw new UsernameNotFoundException("");
         }
 
         user.setPassword(passwordEncoder.encode(password));

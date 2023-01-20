@@ -10,7 +10,7 @@ import java.util.Map;
 public class ResponseService {
     public static Map<String, Object> generateGeneralResponse(String message) {
         Map<String, Object> response = new LinkedHashMap<>();
-        response.put("timestamp", LocalDateTime.now());
+        response.put("timestamp", LocalDateTime.now().toString());
         response.put("message", message);
         return response;
     }
