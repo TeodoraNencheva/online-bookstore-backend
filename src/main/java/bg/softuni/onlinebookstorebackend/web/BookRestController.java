@@ -8,9 +8,6 @@ import bg.softuni.onlinebookstorebackend.model.entity.BookEntity;
 import bg.softuni.onlinebookstorebackend.model.error.BookNotFoundException;
 import bg.softuni.onlinebookstorebackend.service.BookService;
 import bg.softuni.onlinebookstorebackend.service.ResponseService;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -108,11 +105,6 @@ public class BookRestController {
         return ResponseEntity.badRequest().build();
     }
 
-    @Tag(name = "Get books by author", description = "Returns all books by a given author ID")
-    @Parameter(name = "authorId", description = "The id of the author of the books",
-            required = true)
-    @ApiResponse(responseCode = "200", description = "If the author id is valid")
-    @ApiResponse(responseCode = "404", description = "If the author id is invalid")
     @GetMapping
     public ResponseEntity<List<BookOverviewDTO>> getBooksByAuthor(
             @RequestParam(value = "authorId") Long authorId) {
