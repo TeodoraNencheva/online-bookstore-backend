@@ -195,6 +195,7 @@ public class UserService {
         return userOpt.get();
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public void addNewAdmin(String username) {
         Optional<UserEntity> userOpt = userRepository.findByEmail(username);
         if (userOpt.isEmpty()) {
@@ -215,6 +216,7 @@ public class UserService {
         return userRoleRepository.findByName(UserRoleEnum.USER).get();
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public List<UserOverviewDTO> getAllUsersOverview() {
         return userRepository.findAll().stream()
                 .filter(u -> !u.getRoles().contains(getAdminRole()))

@@ -9,8 +9,10 @@ import bg.softuni.onlinebookstorebackend.model.error.OrderNotFoundException;
 import bg.softuni.onlinebookstorebackend.model.mapper.OrderMapper;
 import bg.softuni.onlinebookstorebackend.repositories.OrderRepository;
 import bg.softuni.onlinebookstorebackend.repositories.UserRepository;
+import bg.softuni.onlinebookstorebackend.user.BookstoreUserDetails;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ public class OrderService {
     private final UserRepository userRepository;
     private int newOrdersCount = 0;
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public int getNewOrdersCount() {
         return newOrdersCount;
     }
@@ -45,12 +48,14 @@ public class OrderService {
         newOrdersCount++;
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public List<OrderListDTO> getUnprocessedOrders() {
         return orderRepository.getAllUnprocessed().stream()
                 .map(orderMapper::orderEntityToOrderListDTO)
                 .collect(Collectors.toList());
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public List<OrderListDTO> getProcessedOrders() {
         return orderRepository.getAllProcessed().stream()
                 .map(orderMapper::orderEntityToOrderListDTO)
@@ -66,8 +71,9 @@ public class OrderService {
         return orderOpt.get();
     }
 
+    @PreAuthorize("@orderService.isOwner(#principal.username, #id) or #principal.admin")
     @Transactional
-    public Map<Long, Integer> getOrderItems(UUID id) {
+    public Map<Long, Integer> getOrderItems(UUID id, BookstoreUserDetails principal) {
         Map<BookEntity, Integer> items = getOrder(id).getItems();
         Map<Long, Integer> result = new LinkedHashMap<>();
 
@@ -78,6 +84,7 @@ public class OrderService {
         return result;
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public void confirmOrder(UUID id) {
         OrderEntity order = getOrder(id);
         order.setProcessed(true);

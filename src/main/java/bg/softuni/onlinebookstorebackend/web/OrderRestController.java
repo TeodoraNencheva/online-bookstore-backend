@@ -8,7 +8,6 @@ import bg.softuni.onlinebookstorebackend.user.BookstoreUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -25,24 +24,20 @@ import java.util.UUID;
 public class OrderRestController {
     private final OrderService orderService;
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("/processed")
     public ResponseEntity<List<OrderListDTO>> getProcessedOrders() {
         return ResponseEntity.ok(orderService.getProcessedOrders());
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("/unprocessed")
     public ResponseEntity<List<OrderListDTO>> getUnprocessedOrders() {
         return ResponseEntity.ok(orderService.getUnprocessedOrders());
     }
 
-
-    @PreAuthorize("@orderService.isOwner(#principal.username, #id) or #principal.admin")
     @GetMapping("/{id}/details")
     public ResponseEntity<Object> getOrderDetails(@PathVariable("id") UUID id,
                                   @AuthenticationPrincipal BookstoreUserDetails principal) {
-        Map<Long, Integer> orderItems = orderService.getOrderItems(id);
+        Map<Long, Integer> orderItems = orderService.getOrderItems(id, principal);
 
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("orderId", id);
@@ -50,7 +45,6 @@ public class OrderRestController {
         return ResponseEntity.ok(body);
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping("/{id}/confirm")
     public ResponseEntity<Object> confirmOrder(@PathVariable("id") UUID id) {
         orderService.confirmOrder(id);
@@ -64,7 +58,6 @@ public class OrderRestController {
         return ResponseEntity.ok(orderService.getLoggedUserOrders(userDetails));
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("/statistics")
     public ResponseEntity<Integer> getOrdersStatistics() {
         return ResponseEntity.ok(orderService.getNewOrdersCount());
