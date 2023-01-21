@@ -17,8 +17,8 @@ public class MaintenanceInterceptor implements HandlerInterceptor {
         LocalDateTime now = LocalDateTime.now();
         boolean isClosed = now.getHour() <= 5 && now.getDayOfWeek().equals(DayOfWeek.SUNDAY);
 
-        if (!request.getRequestURI().equals("/maintenance") && isClosed) {
-            response.sendRedirect("/maintenance");
+        if (!request.getRequestURI().equals("/api/maintenance") && isClosed) {
+            response.sendRedirect("/api/maintenance");
             return false;
         }
 

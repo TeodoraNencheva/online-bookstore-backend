@@ -41,7 +41,7 @@ public class AppConfig {
     }
 
     @Bean
-    public AuthenticationEntryPoint authenticationFailureHandler() {
+    public AuthenticationEntryPoint authenticationEntryPoint() {
         return new CustomAuthenticationEntryPoint();
     }
 

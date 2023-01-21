@@ -38,8 +38,7 @@ public class OrderRestController {
     }
 
 
-    //@PreAuthorize("@orderService.isOwner(#principal.username, #id) or #principal.admin")
-    @PreAuthorize("isOwner(#id)")
+    @PreAuthorize("@orderService.isOwner(#principal.username, #id) or #principal.admin")
     @GetMapping("/{id}/details")
     public ResponseEntity<Object> getOrderDetails(@PathVariable("id") UUID id,
                                   @AuthenticationPrincipal BookstoreUserDetails principal) {
