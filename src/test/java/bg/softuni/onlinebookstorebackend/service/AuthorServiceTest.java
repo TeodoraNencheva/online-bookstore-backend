@@ -2,10 +2,12 @@ package bg.softuni.onlinebookstorebackend.service;
 
 import bg.softuni.onlinebookstorebackend.model.cloudinary.CloudinaryImage;
 import bg.softuni.onlinebookstorebackend.model.dto.author.AddNewAuthorDTO;
+import bg.softuni.onlinebookstorebackend.model.dto.search.SearchDTO;
 import bg.softuni.onlinebookstorebackend.model.entity.AuthorEntity;
 import bg.softuni.onlinebookstorebackend.model.entity.PictureEntity;
 import bg.softuni.onlinebookstorebackend.model.mapper.AuthorMapper;
 import bg.softuni.onlinebookstorebackend.repositories.AuthorRepository;
+import bg.softuni.onlinebookstorebackend.repositories.AuthorSpecification;
 import bg.softuni.onlinebookstorebackend.repositories.BookRepository;
 import bg.softuni.onlinebookstorebackend.repositories.PictureRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -103,14 +105,22 @@ public class AuthorServiceTest {
     @Test
     void canAddAuthorWithoutPicture() throws IOException {
         authorModel = new AddNewAuthorDTO("Ivan", "Vazov", "biography", null);
+        AuthorEntity expected = new AuthorEntity(authorModel, null);
+
         underTest.addNewAuthor(authorModel);
+        ArgumentCaptor<AuthorEntity> argumentCaptor =
+                ArgumentCaptor.forClass(AuthorEntity.class);
+
         verify(cloudinaryService, never()).upload(any(MultipartFile.class));
         verify(pictureRepository, never()).save(any(PictureEntity.class));
-        verify(authorRepository).save(any(AuthorEntity.class));
+        verify(authorRepository).save(argumentCaptor.capture());
+
+        AuthorEntity captured = argumentCaptor.getValue();
+        assertThat(captured).usingRecursiveComparison().isEqualTo(expected);
     }
 
     @Test
-    void canUpdateAuthorWithPictureWhenAuthorExists() throws IOException {
+    void canUpdateAuthorWithPicture() throws IOException {
         picture = new MockMultipartFile("picture.png", "picture.png", "multipart/form-data", new byte[]{});
         authorModel = new AddNewAuthorDTO("Ivan", "Vazov", "biography", picture);
 
@@ -130,5 +140,54 @@ public class AuthorServiceTest {
 
         AuthorEntity captured = argumentCaptor.getValue();
         assertThat(captured).usingRecursiveComparison().isEqualTo(expected);
+    }
+
+    @Test
+    void canUpdateAuthorWithoutPicture() throws IOException {
+        authorModel = new AddNewAuthorDTO("Ivan", "Vazov", "biography", picture);
+        AuthorEntity expected = new AuthorEntity(authorModel, null);
+
+        when(authorRepository.findById(1L)).thenReturn(Optional.of(new AuthorEntity()));
+        underTest.updateAuthor(authorModel, 1L);
+
+        ArgumentCaptor<AuthorEntity> argumentCaptor =
+                ArgumentCaptor.forClass(AuthorEntity.class);
+
+
+        verify(authorRepository).findById(1L);
+        verify(cloudinaryService, never()).upload(any(MultipartFile.class));
+        verify(pictureRepository, never()).save(any(PictureEntity.class));
+        verify(authorRepository).save(argumentCaptor.capture());
+
+        AuthorEntity captured = argumentCaptor.getValue();
+        assertThat(captured).usingRecursiveComparison().isEqualTo(expected);
+    }
+
+    @Test
+    void cannotUpdateAuthorWhenAuthorDoesNotExist() throws IOException {
+        picture = new MockMultipartFile("picture.png", "picture.png", "multipart/form-data", new byte[]{});
+        authorModel = new AddNewAuthorDTO("Ivan", "Vazov", "biography", picture);
+
+        when(authorRepository.findById(1L)).thenReturn(Optional.empty());
+        underTest.updateAuthor(authorModel, 1L);
+
+        verify(authorRepository).findById(1L);
+        verify(cloudinaryService, never()).upload(any(MultipartFile.class));
+        verify(pictureRepository, never()).save(any(PictureEntity.class));
+        verify(authorRepository, never()).save(any(AuthorEntity.class));
+    }
+
+    @Test
+    void canDeleteAuthor() {
+        underTest.deleteAuthor(1L);
+        verify(bookRepository).deleteAllByAuthor_Id(1L);
+        verify(authorRepository).deleteById(1L);
+    }
+
+    @Test
+    void canSearchAuthors() {
+        SearchDTO searchDTO = new SearchDTO("john");
+        underTest.searchAuthors(searchDTO);
+        verify(authorRepository).findAll(any(AuthorSpecification.class));
     }
 }
