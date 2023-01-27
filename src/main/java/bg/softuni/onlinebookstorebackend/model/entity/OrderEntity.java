@@ -39,12 +39,12 @@ public class OrderEntity {
 
     @Getter
     @Setter
-    private boolean isProcessed;
+    private boolean processed;
 
     public OrderEntity(UserEntity owner, Map<BookEntity, Integer> items) {
         this.owner = owner;
         setItems(items);
-        this.isProcessed = false;
+        this.processed = false;
     }
 
     public void setItems(Map<BookEntity, Integer> items) {

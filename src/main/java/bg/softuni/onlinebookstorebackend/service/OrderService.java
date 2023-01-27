@@ -51,14 +51,14 @@ public class OrderService {
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public List<OrderListDTO> getUnprocessedOrders() {
-        return orderRepository.getAllUnprocessed().stream()
+        return orderRepository.getAllByProcessed(false).stream()
                 .map(orderMapper::orderEntityToOrderListDTO)
                 .collect(Collectors.toList());
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public List<OrderListDTO> getProcessedOrders() {
-        return orderRepository.getAllProcessed().stream()
+        return orderRepository.getAllByProcessed(true).stream()
                 .map(orderMapper::orderEntityToOrderListDTO)
                 .collect(Collectors.toList());
     }
