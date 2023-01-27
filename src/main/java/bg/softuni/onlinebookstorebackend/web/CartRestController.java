@@ -2,6 +2,7 @@ package bg.softuni.onlinebookstorebackend.web;
 
 import bg.softuni.onlinebookstorebackend.model.dto.book.AddBookToCartDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.book.BookAddedToCartDTO;
+import bg.softuni.onlinebookstorebackend.model.entity.OrderEntity;
 import bg.softuni.onlinebookstorebackend.model.error.EmptyCartException;
 import bg.softuni.onlinebookstorebackend.service.BookService;
 import bg.softuni.onlinebookstorebackend.service.OrderService;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Map;
 
@@ -61,11 +63,14 @@ public class CartRestController {
     }
 
     @PostMapping("/confirm")
-    public ResponseEntity<Object> confirmOrder(@AuthenticationPrincipal UserDetails userDetails) {
-        orderService.createNewOrder(userDetails);
+    public ResponseEntity<Object> confirmOrder(@AuthenticationPrincipal UserDetails userDetails,
+                                               UriComponentsBuilder uriComponentsBuilder) {
+        OrderEntity newOrder = orderService.createNewOrder(userDetails);
 
-        Map<String, Object> body = ResponseService.generateGeneralResponse("New order created.");
-        return new ResponseEntity<>(body, HttpStatus.OK);
+        return ResponseEntity
+                .created(uriComponentsBuilder.path("/api/orders/{id}/details")
+                        .build(newOrder.getId()))
+                .build();
     }
 
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)

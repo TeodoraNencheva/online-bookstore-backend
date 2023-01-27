@@ -45,11 +45,8 @@ public class AuthorService {
 
     public AuthorDetailsDTO getAuthorDetails(Long id) {
         Optional<AuthorEntity> authorOpt = authorRepository.findById(id);
-        if (authorOpt.isEmpty()) {
-            return null;
-        }
+        return authorOpt.map(authorMapper::authorEntityToAuthorDetailsDTO).orElse(null);
 
-        return authorMapper.authorEntityToAuthorDetailsDTO(authorOpt.get());
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -67,11 +64,8 @@ public class AuthorService {
 
     public AddNewAuthorDTO getAuthorById(Long id) {
         Optional<AuthorEntity> authorOpt = authorRepository.findById(id);
-        if (authorOpt.isEmpty()) {
-            return null;
-        }
+        return authorOpt.map(AddNewAuthorDTO::new).orElse(null);
 
-        return new AddNewAuthorDTO(authorOpt.get());
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")

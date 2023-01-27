@@ -19,8 +19,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -53,11 +55,15 @@ public class AuthorRestController {
 
     @PostMapping(path = "/add", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<AuthorEntity> addAuthor(@Valid @RequestPart AddNewAuthorDTO authorModel,
-                                                  @RequestPart(required = false) MultipartFile picture) throws IOException {
+                                                  @RequestPart(required = false) MultipartFile picture,
+                                                  UriComponentsBuilder uriComponentsBuilder) throws IOException {
         authorModel.setPicture(picture);
         AuthorEntity newAuthor = authorService.addNewAuthor(authorModel);
 
-        return ResponseEntity.ok(newAuthor);
+        return ResponseEntity
+                .created(uriComponentsBuilder.path("/api/authors/{id}")
+                        .build(newAuthor.getId()))
+                .build();
     }
 
     @PutMapping(path = "/{id}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})

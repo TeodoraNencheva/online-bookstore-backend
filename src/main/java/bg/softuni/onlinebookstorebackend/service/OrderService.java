@@ -34,18 +34,19 @@ public class OrderService {
     }
 
     @Transactional
-    public void createNewOrder(UserDetails userDetails) {
+    public OrderEntity createNewOrder(UserDetails userDetails) {
         UserEntity user = userRepository.findByEmail(userDetails.getUsername()).get();
         if (user.getCart() == null || user.getCart().isEmpty()) {
             throw new EmptyCartException("Cannot create order on empty cart!");
         }
 
         Map<BookEntity, Integer> items = user.getCart();
-        OrderEntity newOrder = new OrderEntity(user, items);
-        orderRepository.save(newOrder);
+        OrderEntity newOrder = orderRepository.save(new OrderEntity(user, items));
         user.emptyCart();
         userRepository.save(user);
         newOrdersCount++;
+
+        return newOrder;
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")

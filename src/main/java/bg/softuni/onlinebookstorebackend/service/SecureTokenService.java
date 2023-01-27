@@ -25,7 +25,7 @@ public class SecureTokenService {
     private int tokenValidityInHours;
 
     public SecureTokenEntity createSecureToken(){
-        String tokenValue = new String(Base64.encodeBase64URLSafeString(DEFAULT_TOKEN_GENERATOR.generateKey()));
+        String tokenValue = Base64.encodeBase64URLSafeString(DEFAULT_TOKEN_GENERATOR.generateKey());
         SecureTokenEntity secureTokenEntity = new SecureTokenEntity();
         secureTokenEntity.setToken(tokenValue);
         secureTokenEntity.setExpireAt(LocalDateTime.now().plusHours(tokenValidityInHours));

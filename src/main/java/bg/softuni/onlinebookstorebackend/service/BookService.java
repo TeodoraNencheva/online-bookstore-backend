@@ -34,11 +34,8 @@ public class BookService {
 
     public BookDetailsDTO getBookDetails(Long id) {
         Optional<BookEntity> bookOpt = bookRepository.findById(id);
-        if (bookOpt.isEmpty()) {
-            return null;
-        }
+        return bookOpt.map(bookMapper::bookEntityToBookDetailsDTO).orElse(null);
 
-        return bookMapper.bookEntityToBookDetailsDTO(bookOpt.get());
     }
 
     public Page<BookOverviewDTO> getAllBooks(Pageable pageable) {

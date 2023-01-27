@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.List;
@@ -62,11 +63,15 @@ public class BookRestController {
 
     @PostMapping(path = "/add", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<BookEntity> addBook(@Valid @RequestPart AddNewBookDTO bookModel,
-                                              @RequestPart(required = false) MultipartFile picture) throws IOException {
+                                              @RequestPart(required = false) MultipartFile picture,
+                                              UriComponentsBuilder uriComponentsBuilder) throws IOException {
         bookModel.setPicture(picture);
         BookEntity newBook = this.bookService.addNewBook(bookModel);
 
-        return ResponseEntity.ok(newBook);
+        return ResponseEntity
+                .created(uriComponentsBuilder.path("/api/books/{id}/details")
+                        .build(newBook.getId()))
+                .build();
     }
 
     @PutMapping(path = "/{id}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
