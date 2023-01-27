@@ -2,7 +2,6 @@ package bg.softuni.onlinebookstorebackend.service;
 
 import bg.softuni.onlinebookstorebackend.model.dto.author.AddNewAuthorDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.author.AuthorDetailsDTO;
-import bg.softuni.onlinebookstorebackend.model.dto.author.AuthorNameDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.author.AuthorOverviewDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.search.SearchDTO;
 import bg.softuni.onlinebookstorebackend.model.entity.AuthorEntity;
@@ -21,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -37,21 +37,19 @@ public class AuthorService {
         return authorRepository.findAll(pageable).map(authorMapper::authorEntityToAuthorOverviewDTO);
     }
 
-    public List<AuthorNameDTO> getAllAuthors() {
-        return authorRepository.findAll().stream()
-                .map(authorMapper::authorEntityToAuthorNameDTO)
-                .collect(Collectors.toList());
+    public AddNewAuthorDTO getAuthorById(Long id) {
+        Optional<AuthorEntity> authorOpt = authorRepository.findById(id);
+        return authorOpt.map(AddNewAuthorDTO::new).orElse(null);
     }
 
     public AuthorDetailsDTO getAuthorDetails(Long id) {
         Optional<AuthorEntity> authorOpt = authorRepository.findById(id);
         return authorOpt.map(authorMapper::authorEntityToAuthorDetailsDTO).orElse(null);
-
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public AuthorEntity addNewAuthor(AddNewAuthorDTO authorModel) throws IOException {
-        if (authorModel.getPicture() != null && !authorModel.getPicture().getOriginalFilename().isEmpty()) {
+        if (authorModel.getPicture() != null && !Objects.requireNonNull(authorModel.getPicture().getOriginalFilename()).isEmpty()) {
             PictureEntity picture = new PictureEntity(cloudinaryService.upload(authorModel.getPicture()));
             pictureRepository.save(picture);
             AuthorEntity newAuthor = new AuthorEntity(authorModel, picture);
@@ -60,12 +58,6 @@ public class AuthorService {
 
         AuthorEntity newAuthor = new AuthorEntity(authorModel);
         return authorRepository.save(newAuthor);
-    }
-
-    public AddNewAuthorDTO getAuthorById(Long id) {
-        Optional<AuthorEntity> authorOpt = authorRepository.findById(id);
-        return authorOpt.map(AddNewAuthorDTO::new).orElse(null);
-
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -80,7 +72,7 @@ public class AuthorService {
         author.setLastName(authorModel.getLastName());
         author.setBiography(authorModel.getBiography());
 
-        if (authorModel.getPicture() != null && !authorModel.getPicture().getOriginalFilename().isEmpty()) {
+        if (authorModel.getPicture() != null && !Objects.requireNonNull(authorModel.getPicture().getOriginalFilename()).isEmpty()) {
             PictureEntity picture = new PictureEntity(cloudinaryService.upload(authorModel.getPicture()));
             pictureRepository.save(picture);
             author.setPicture(picture);
