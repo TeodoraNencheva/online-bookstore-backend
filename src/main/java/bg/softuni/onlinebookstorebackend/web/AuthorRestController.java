@@ -5,7 +5,6 @@ import bg.softuni.onlinebookstorebackend.model.dto.author.AuthorDetailsDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.author.AuthorOverviewDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.search.SearchDTO;
 import bg.softuni.onlinebookstorebackend.model.entity.AuthorEntity;
-import bg.softuni.onlinebookstorebackend.model.error.AuthorNotFoundException;
 import bg.softuni.onlinebookstorebackend.service.AuthorService;
 import bg.softuni.onlinebookstorebackend.service.ResponseService;
 import jakarta.validation.Valid;
@@ -44,11 +43,6 @@ public class AuthorRestController {
     @GetMapping("/{id}")
     public ResponseEntity<AuthorDetailsDTO> getAuthorDetails(@PathVariable("id") Long id) {
         AuthorDetailsDTO author = authorService.getAuthorDetails(id);
-
-        if (author == null) {
-            throw new AuthorNotFoundException(id);
-        }
-
         return ResponseEntity.ok(author);
     }
 
@@ -71,20 +65,11 @@ public class AuthorRestController {
                                                      @PathVariable("id") Long id) throws IOException {
         authorModel.setPicture(picture);
         AuthorEntity updatedAuthor = authorService.updateAuthor(authorModel, id);
-
-        if (updatedAuthor == null) {
-            throw new AuthorNotFoundException(id);
-        }
-
         return ResponseEntity.ok(updatedAuthor);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteAuthor(@PathVariable("id") Long id) {
-        if (authorService.getAuthorById(id) == null) {
-            throw new AuthorNotFoundException(id);
-        }
-
         authorService.deleteAuthor(id);
 
         Map<String, Object> body = ResponseService.generateGeneralResponse(String.format("Author with ID %s deleted", id));

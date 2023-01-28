@@ -6,6 +6,7 @@ import bg.softuni.onlinebookstorebackend.model.dto.author.AuthorOverviewDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.search.SearchDTO;
 import bg.softuni.onlinebookstorebackend.model.entity.AuthorEntity;
 import bg.softuni.onlinebookstorebackend.model.entity.PictureEntity;
+import bg.softuni.onlinebookstorebackend.model.error.AuthorNotFoundException;
 import bg.softuni.onlinebookstorebackend.model.mapper.AuthorMapper;
 import bg.softuni.onlinebookstorebackend.repositories.AuthorRepository;
 import bg.softuni.onlinebookstorebackend.repositories.AuthorSpecification;
@@ -34,17 +35,14 @@ public class AuthorService {
     private final CloudinaryService cloudinaryService;
 
     public Page<AuthorOverviewDTO> getAllAuthors(Pageable pageable) {
-        return authorRepository.findAll(pageable).map(authorMapper::authorEntityToAuthorOverviewDTO);
-    }
-
-    public AddNewAuthorDTO getAuthorById(Long id) {
-        Optional<AuthorEntity> authorOpt = authorRepository.findById(id);
-        return authorOpt.map(AddNewAuthorDTO::new).orElse(null);
+        return authorRepository.findAll(pageable)
+                .map(authorMapper::authorEntityToAuthorOverviewDTO);
     }
 
     public AuthorDetailsDTO getAuthorDetails(Long id) {
         Optional<AuthorEntity> authorOpt = authorRepository.findById(id);
-        return authorOpt.map(authorMapper::authorEntityToAuthorDetailsDTO).orElse(null);
+        return authorOpt.map(authorMapper::authorEntityToAuthorDetailsDTO)
+                .orElseThrow(() -> new AuthorNotFoundException(id));
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -64,7 +62,7 @@ public class AuthorService {
     public AuthorEntity updateAuthor(AddNewAuthorDTO authorModel, Long id) throws IOException {
         Optional<AuthorEntity> authorOpt = authorRepository.findById(id);
         if (authorOpt.isEmpty()) {
-            return null;
+            throw new AuthorNotFoundException(id);
         }
 
         AuthorEntity author = authorOpt.get();
@@ -84,6 +82,11 @@ public class AuthorService {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @Transactional
     public void deleteAuthor(Long id) {
+        Optional<AuthorEntity> authorOpt = authorRepository.findById(id);
+        if (authorOpt.isEmpty()) {
+            throw new AuthorNotFoundException(id);
+        }
+
         bookRepository.deleteAllByAuthor_Id(id);
         authorRepository.deleteById(id);
     }
