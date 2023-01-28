@@ -54,10 +54,6 @@ public class BookRestController {
     @GetMapping("/{id}/details")
     public ResponseEntity<BookDetailsDTO> getBookDetails(@PathVariable("id") Long id) {
         BookDetailsDTO bookDetails = bookService.getBookDetails(id);
-        if (bookDetails == null) {
-            throw new BookNotFoundException(id);
-        }
-
         return ResponseEntity.ok(bookDetails);
     }
 
@@ -79,21 +75,12 @@ public class BookRestController {
                                                  @RequestPart(required = false) MultipartFile picture,
                                                  @PathVariable("id") Long id) throws IOException {
         bookModel.setPicture(picture);
-
         BookEntity updatedBook = this.bookService.updateBook(bookModel, id);
-        if (updatedBook == null) {
-            throw new BookNotFoundException(id);
-        }
-
         return ResponseEntity.ok(updatedBook);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteBook(@PathVariable("id") Long id) {
-        if (bookService.getBookById(id) == null) {
-            throw new BookNotFoundException(id);
-        }
-
         bookService.deleteBook(id);
 
         Map<String, Object> body = ResponseService.generateGeneralResponse(String.format("Book with ID %s deleted", id));
