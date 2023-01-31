@@ -5,17 +5,16 @@ import bg.softuni.onlinebookstorebackend.model.dto.book.BookDetailsDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.book.BookOverviewDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.search.SearchDTO;
 import bg.softuni.onlinebookstorebackend.model.entity.BookEntity;
-import bg.softuni.onlinebookstorebackend.model.error.BookNotFoundException;
 import bg.softuni.onlinebookstorebackend.service.BookService;
 import bg.softuni.onlinebookstorebackend.service.ResponseService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,7 +33,7 @@ public class BookRestController {
     private final BookService bookService;
 
     @GetMapping("/all")
-    public ResponseEntity<Page<BookOverviewDTO>> getAllBooks(
+    public ResponseEntity<List<BookOverviewDTO>> getAllBooks(
             @RequestParam(value = "size", defaultValue = "5") int size,
             @RequestParam(value = "page", defaultValue = "0") int page) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("title").ascending());
@@ -43,7 +42,7 @@ public class BookRestController {
     }
 
     @GetMapping("/{genre}")
-    public ResponseEntity<Page<BookOverviewDTO>> getBooksByGenre(@PathVariable("genre") String genre,
+    public ResponseEntity<List<BookOverviewDTO>> getBooksByGenre(@PathVariable("genre") String genre,
                                                                  @RequestParam(value = "size", defaultValue = "5") int size,
                                                                  @RequestParam(value = "page", defaultValue = "0") int page) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("title").ascending());
@@ -57,9 +56,10 @@ public class BookRestController {
         return ResponseEntity.ok(bookDetails);
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping(path = "/add", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<BookEntity> addBook(@Valid @RequestPart AddNewBookDTO bookModel,
-                                              @RequestPart(required = false) MultipartFile picture,
+    public ResponseEntity<BookEntity> addBook(@Valid @RequestPart(name = "bookModel") AddNewBookDTO bookModel,
+                                              @RequestPart(name = "picture", required = false) MultipartFile picture,
                                               UriComponentsBuilder uriComponentsBuilder) throws IOException {
         bookModel.setPicture(picture);
         BookEntity newBook = this.bookService.addNewBook(bookModel);
@@ -70,15 +70,17 @@ public class BookRestController {
                 .build();
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PutMapping(path = "/{id}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<BookEntity> updateBook(@Valid @RequestPart AddNewBookDTO bookModel,
-                                                 @RequestPart(required = false) MultipartFile picture,
+    public ResponseEntity<BookEntity> updateBook(@Valid @RequestPart(name = "bookModel") AddNewBookDTO bookModel,
+                                                 @RequestPart(name = "picture", required = false) MultipartFile picture,
                                                  @PathVariable("id") Long id) throws IOException {
         bookModel.setPicture(picture);
         BookEntity updatedBook = this.bookService.updateBook(bookModel, id);
         return ResponseEntity.ok(updatedBook);
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteBook(@PathVariable("id") Long id) {
         bookService.deleteBook(id);

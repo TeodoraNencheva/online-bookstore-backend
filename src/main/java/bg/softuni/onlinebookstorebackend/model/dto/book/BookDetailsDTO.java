@@ -1,6 +1,7 @@
 package bg.softuni.onlinebookstorebackend.model.dto.book;
 
 import bg.softuni.onlinebookstorebackend.model.entity.AuthorEntity;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -8,6 +9,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 public class BookDetailsDTO {

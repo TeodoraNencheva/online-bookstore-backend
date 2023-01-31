@@ -66,8 +66,8 @@ public class AuthorRestController {
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PutMapping(path = "/{id}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<AuthorEntity> updateAuthor(@Valid @RequestPart AddNewAuthorDTO authorModel,
-                                                     @RequestPart(required = false) MultipartFile picture,
+    public ResponseEntity<AuthorEntity> updateAuthor(@Valid @RequestPart(name = "authorModel") AddNewAuthorDTO authorModel,
+                                                     @RequestPart(name = "picture", required = false) MultipartFile picture,
                                                      @PathVariable("id") Long id) throws IOException {
         if (picture != null) {
             authorModel.setPicture(picture);

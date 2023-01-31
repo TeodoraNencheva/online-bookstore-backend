@@ -12,7 +12,6 @@ import bg.softuni.onlinebookstorebackend.model.error.GenreNotFoundException;
 import bg.softuni.onlinebookstorebackend.model.mapper.BookMapper;
 import bg.softuni.onlinebookstorebackend.repositories.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -33,19 +32,28 @@ public class BookService {
     private final CloudinaryService cloudinaryService;
     private final PictureRepository pictureRepository;
 
-    public Page<BookOverviewDTO> getAllBooks(Pageable pageable) {
-        return bookRepository.findAll(pageable).map(bookMapper::bookEntityToBookOverviewDTO);
+    public List<BookOverviewDTO> getAllBooks(Pageable pageable) {
+        return bookRepository
+                .findAll(pageable)
+                .getContent()
+                .stream()
+                .map(bookMapper::bookEntityToBookOverviewDTO)
+                .toList();
     }
 
-    public Page<BookOverviewDTO> getBooksByGenre(String genre, Pageable pageable) {
+    public List<BookOverviewDTO> getBooksByGenre(String genre, Pageable pageable) {
         Optional<GenreEntity> genreOpt = genreRepository.findByName(genre);
 
         if (genreOpt.isEmpty()) {
             throw new GenreNotFoundException(genre);
         }
 
-        return bookRepository.getAllByGenre(genreOpt.get(), pageable)
-                .map(bookMapper::bookEntityToBookOverviewDTO);
+        return bookRepository
+                .getAllByGenre(genreOpt.get(), pageable)
+                .getContent()
+                .stream()
+                .map(bookMapper::bookEntityToBookOverviewDTO)
+                .toList();
     }
 
     public BookDetailsDTO getBookDetails(Long id) {

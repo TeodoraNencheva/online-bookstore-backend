@@ -5,8 +5,11 @@ import bg.softuni.onlinebookstorebackend.model.dto.author.AuthorDetailsDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.author.AuthorOverviewDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.search.SearchDTO;
 import bg.softuni.onlinebookstorebackend.model.entity.AuthorEntity;
+import bg.softuni.onlinebookstorebackend.model.error.AuthorNotFoundException;
 import bg.softuni.onlinebookstorebackend.service.AuthorService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -35,6 +38,23 @@ class AuthorRestControllerTest {
 
     @MockBean
     private AuthorService authorService;
+
+    private MockMultipartFile picture;
+    private AddNewAuthorDTO authorDto;
+    private ObjectMapper objectMapper;
+    private MockMultipartFile author;
+
+    @BeforeEach
+    void setUp() throws JsonProcessingException {
+        picture = new MockMultipartFile("picture", "picture.png",
+                "multipart/form-data", new byte[]{});
+        authorDto = new AddNewAuthorDTO("Ivan", "Vazov",
+                "biography", null);
+
+        objectMapper = new ObjectMapper();
+        author = new MockMultipartFile("authorModel", "",
+                "application/json", objectMapper.writeValueAsString(authorDto).getBytes());
+    }
 
     @Test
     void canGetAllAuthors() throws Exception {
@@ -66,18 +86,21 @@ class AuthorRestControllerTest {
         verify(authorService, times(1)).getAuthorDetails(1L);
     }
 
+    @Test
+    void cannotGetAuthorDetailsWhenAuthorDoesNotExist() throws Exception {
+        when(authorService.getAuthorDetails(anyLong()))
+                .thenThrow(new AuthorNotFoundException(1L));
+
+        mockMvc.perform(get("/api/authors/{id}", 1L))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Author with ID 1 not found"));
+
+        verify(authorService, times(1)).getAuthorDetails(1L);
+    }
+
     @WithMockUser(authorities = "ROLE_ADMIN")
     @Test
     void adminCanAddNewAuthor() throws Exception {
-        MockMultipartFile picture = new MockMultipartFile("picture", "picture.png",
-                "multipart/form-data", new byte[]{});
-        AddNewAuthorDTO authorDto = new AddNewAuthorDTO("Ivan", "Vazov",
-                "biography", null);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        MockMultipartFile author = new MockMultipartFile("authorModel", "",
-                "application/json", objectMapper.writeValueAsString(authorDto).getBytes());
-
         AuthorEntity toReturn = new AuthorEntity();
         toReturn.setId(1L);
 
@@ -96,15 +119,6 @@ class AuthorRestControllerTest {
     @WithMockUser(authorities = "ROLE_USER")
     @Test
     void throwsWhenUserAddsAuthor() throws Exception {
-        MockMultipartFile picture = new MockMultipartFile("picture", "picture.png",
-                "multipart/form-data", new byte[]{});
-        AddNewAuthorDTO authorDto = new AddNewAuthorDTO("Ivan", "Vazov",
-                "biography", null);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        MockMultipartFile author = new MockMultipartFile("authorModel", "",
-                "application/json", objectMapper.writeValueAsString(authorDto).getBytes());
-
         mockMvc.perform(multipart("/api/authors/add")
                         .file(author)
                         .file(picture))
@@ -116,15 +130,6 @@ class AuthorRestControllerTest {
     @WithAnonymousUser
     @Test
     void throwsWhenAnonymousUserAddsAuthor() throws Exception {
-        MockMultipartFile picture = new MockMultipartFile("picture", "picture.png",
-                "multipart/form-data", new byte[]{});
-        AddNewAuthorDTO authorDto = new AddNewAuthorDTO("Ivan", "Vazov",
-                "biography", null);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        MockMultipartFile author = new MockMultipartFile("authorModel", "",
-                "application/json", objectMapper.writeValueAsString(authorDto).getBytes());
-
         mockMvc.perform(multipart("/api/authors/add")
                         .file(author)
                         .file(picture))
@@ -136,15 +141,6 @@ class AuthorRestControllerTest {
     @WithMockUser(authorities = "ROLE_ADMIN")
     @Test
     void adminCanUpdateAuthor() throws Exception {
-        MockMultipartFile picture = new MockMultipartFile("picture", "picture.png",
-                "multipart/form-data", new byte[]{});
-        AddNewAuthorDTO authorDto = new AddNewAuthorDTO("Ivan", "Vazov",
-                "biography", null);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        MockMultipartFile author = new MockMultipartFile("authorModel", "",
-                "application/json", objectMapper.writeValueAsString(authorDto).getBytes());
-
         AuthorEntity toReturn = new AuthorEntity(authorDto);
 
         when(authorService.updateAuthor(any(AddNewAuthorDTO.class), anyLong()))
@@ -161,18 +157,25 @@ class AuthorRestControllerTest {
         verify(authorService, times(1)).updateAuthor(any(AddNewAuthorDTO.class), anyLong());
     }
 
+    @WithMockUser(authorities = "ROLE_ADMIN")
+    @Test
+    void adminCannotUpdateAuthorWhenAuthorDoesNotExist() throws Exception {
+        when(authorService.updateAuthor(any(AddNewAuthorDTO.class), anyLong()))
+                .thenThrow(new AuthorNotFoundException(1L));
+
+        mockMvc.perform(multipart(HttpMethod.PUT, "/api/authors/{id}", 1L)
+                        .file(author)
+                        .file(picture))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Author with ID 1 not found"));
+
+        verify(authorService, times(1))
+                .updateAuthor(any(AddNewAuthorDTO.class), anyLong());
+    }
+
     @WithMockUser(authorities = "ROLE_USER")
     @Test
     void throwsWhenUserUpdatesAuthor() throws Exception {
-        MockMultipartFile picture = new MockMultipartFile("picture", "picture.png",
-                "multipart/form-data", new byte[]{});
-        AddNewAuthorDTO authorDto = new AddNewAuthorDTO("Ivan", "Vazov",
-                "biography", null);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        MockMultipartFile author = new MockMultipartFile("authorModel", "",
-                "application/json", objectMapper.writeValueAsString(authorDto).getBytes());
-
         mockMvc.perform(multipart(HttpMethod.PUT, "/api/authors/{id}", 1L)
                         .file(author)
                         .file(picture))
@@ -184,15 +187,6 @@ class AuthorRestControllerTest {
     @WithAnonymousUser
     @Test
     void throwsWhenAnonymousUserUpdatesAuthor() throws Exception {
-        MockMultipartFile picture = new MockMultipartFile("picture", "picture.png",
-                "multipart/form-data", new byte[]{});
-        AddNewAuthorDTO authorDto = new AddNewAuthorDTO("Ivan", "Vazov",
-                "biography", null);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        MockMultipartFile author = new MockMultipartFile("authorModel", "",
-                "application/json", objectMapper.writeValueAsString(authorDto).getBytes());
-
         mockMvc.perform(multipart(HttpMethod.PUT, "/api/authors/{id}", 1L)
                         .file(author)
                         .file(picture))
@@ -211,6 +205,19 @@ class AuthorRestControllerTest {
                 .andExpect(jsonPath("$.message").value("Author with ID 1 deleted"));
 
         verify(authorService, times(1)).deleteAuthor(1L);
+    }
+
+    @WithMockUser(authorities = "ROLE_ADMIN")
+    @Test
+    void adminCannotDeleteAuthorWhenAuthorDoesNotExist() throws Exception {
+        doThrow(new AuthorNotFoundException(1L)).when(authorService).deleteAuthor(anyLong());
+
+        mockMvc.perform(delete("/api/authors/{id}", 1L))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Author with ID 1 not found"));
+
+        verify(authorService, times(1))
+                .deleteAuthor(anyLong());
     }
 
     @WithMockUser(authorities = "ROLE_USER")
@@ -236,8 +243,6 @@ class AuthorRestControllerTest {
         when(authorService.searchAuthors(any(SearchDTO.class)))
                 .thenReturn(List.of(new AuthorOverviewDTO(1L, "Ivan Vazov", "picture")));
 
-        ObjectMapper objectMapper = new ObjectMapper();
-
         mockMvc.perform(get("/api/authors/search")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(new SearchDTO("search text"))))
@@ -252,8 +257,6 @@ class AuthorRestControllerTest {
 
     @Test
     void cannotSearchAuthorsWithBlankSearchText() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-
         mockMvc.perform(get("/api/authors/search")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(new SearchDTO(""))))
@@ -264,8 +267,6 @@ class AuthorRestControllerTest {
 
     @Test
     void cannotSearchAuthorsWithNoSearchText() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-
         mockMvc.perform(get("/api/authors/search")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(new SearchDTO())))
