@@ -9,13 +9,13 @@ import bg.softuni.onlinebookstorebackend.service.AuthorService;
 import bg.softuni.onlinebookstorebackend.service.ResponseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -32,9 +32,10 @@ public class AuthorRestController {
     private final AuthorService authorService;
 
     @GetMapping
-    public ResponseEntity<Page<AuthorOverviewDTO>> getAllAuthors(
+    public ResponseEntity<List<AuthorOverviewDTO>> getAllAuthors(
             @RequestParam(value = "size", defaultValue = "3") int size,
             @RequestParam(value = "page", defaultValue = "0") int page) {
+
         Pageable pageable = PageRequest.of(page, size, Sort.by("lastName").ascending());
 
         return ResponseEntity.ok(authorService.getAllAuthors(pageable));
@@ -46,11 +47,15 @@ public class AuthorRestController {
         return ResponseEntity.ok(author);
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping(path = "/add", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<AuthorEntity> addAuthor(@Valid @RequestPart AddNewAuthorDTO authorModel,
-                                                  @RequestPart(required = false) MultipartFile picture,
+    public ResponseEntity<AuthorEntity> addAuthor(@Valid @RequestPart(name = "authorModel") AddNewAuthorDTO authorModel,
+                                                  @RequestPart(name = "picture", required = false) MultipartFile picture,
                                                   UriComponentsBuilder uriComponentsBuilder) throws IOException {
-        authorModel.setPicture(picture);
+        if (picture != null) {
+            authorModel.setPicture(picture);
+        }
+
         AuthorEntity newAuthor = authorService.addNewAuthor(authorModel);
 
         return ResponseEntity
@@ -59,15 +64,20 @@ public class AuthorRestController {
                 .build();
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PutMapping(path = "/{id}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<AuthorEntity> updateAuthor(@Valid @RequestPart AddNewAuthorDTO authorModel,
                                                      @RequestPart(required = false) MultipartFile picture,
                                                      @PathVariable("id") Long id) throws IOException {
-        authorModel.setPicture(picture);
+        if (picture != null) {
+            authorModel.setPicture(picture);
+        }
+
         AuthorEntity updatedAuthor = authorService.updateAuthor(authorModel, id);
         return ResponseEntity.ok(updatedAuthor);
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteAuthor(@PathVariable("id") Long id) {
         authorService.deleteAuthor(id);
