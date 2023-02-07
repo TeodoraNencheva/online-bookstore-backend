@@ -5,7 +5,9 @@ import bg.softuni.onlinebookstorebackend.model.dto.book.BookDetailsDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.book.BookOverviewDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.search.SearchDTO;
 import bg.softuni.onlinebookstorebackend.model.entity.BookEntity;
+import bg.softuni.onlinebookstorebackend.model.entity.GenreEntity;
 import bg.softuni.onlinebookstorebackend.service.BookService;
+import bg.softuni.onlinebookstorebackend.service.GenreService;
 import bg.softuni.onlinebookstorebackend.service.ResponseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -31,6 +33,7 @@ import java.util.Map;
 @RequestMapping("/api/books")
 public class BookRestController {
     private final BookService bookService;
+    private final GenreService genreService;
 
     @GetMapping("/all")
     public ResponseEntity<List<BookOverviewDTO>> getAllBooks(
@@ -39,6 +42,11 @@ public class BookRestController {
         Pageable pageable = PageRequest.of(page, size, Sort.by("title").ascending());
 
         return ResponseEntity.ok(bookService.getAllBooks(pageable));
+    }
+
+    @GetMapping("/all-genres")
+    public ResponseEntity<List<GenreEntity>> getAllGenres() {
+        return ResponseEntity.ok(genreService.getAllGenres());
     }
 
     @GetMapping("/{genre}")
