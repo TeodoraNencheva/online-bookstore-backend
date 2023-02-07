@@ -1,11 +1,11 @@
 spring:
   datasource:
-    driverClassName: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/bookstore-backend?allowPublicKeyRetrieval=true&useSSL=false&createDatabaseIfNotExist=true&serverTimezone=UTC
-    username: root
-    password: 1234
+    driverClassName: ${DRIVER_CLASS_NAME:com.mysql.cj.jdbc.Driver}
+    url: ${JDBC_DATABASE_URL:jdbc:mysql://localhost:3306/bookstore-backend?allowPublicKeyRetrieval=true&useSSL=false&createDatabaseIfNotExist=true&serverTimezone=UTC}
+    username: ${JDBC_DATABASE_USERNAME:root}
+    password: ${JDBC_DATABSE_PASSWORD:1234}
   jpa:
-    database-platform: org.hibernate.dialect.MySQLDialect
+    database-platform: ${DATABASE_PLATFORM:org.hibernate.dialect.MySQLDialect}
     hibernate:
       ddl-auto: create-drop
     defer-datasource-initialization: true
