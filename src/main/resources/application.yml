@@ -61,3 +61,6 @@ cloudinary:
   api-key: 468519295473947
   api-secret: ${CLOUDINARY_API_SECRET}
   cloud-name: teodoran
+
+server:
+  port: ${PORT:8080}
