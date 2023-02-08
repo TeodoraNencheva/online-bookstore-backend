@@ -76,7 +76,7 @@ class BookServiceTest {
     void canGetAllBooksByGenre() {
         Pageable pageable = PageRequest.of(0, 5, Sort.by("title").ascending());
 
-        when(genreRepository.findByName(anyString()))
+        when(genreRepository.findByNameIgnoreCase(anyString()))
                 .thenReturn(Optional.of(new GenreEntity("genre")));
         when(bookRepository.getAllByGenre(any(GenreEntity.class), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(new BookEntity()), pageable, 1L));
@@ -85,20 +85,20 @@ class BookServiceTest {
 
         underTest.getBooksByGenre("novel", pageable);
 
-        verify(genreRepository).findByName("novel");
+        verify(genreRepository).findByNameIgnoreCase("novel");
         verify(bookRepository).getAllByGenre(any(GenreEntity.class), eq(pageable));
         verify(bookMapper).bookEntityToBookOverviewDTO(any(BookEntity.class));
     }
 
     @Test
     void throwsWhenGenreDoesNotExist() {
-        when(genreRepository.findByName(anyString())).thenReturn(Optional.empty());
+        when(genreRepository.findByNameIgnoreCase(anyString())).thenReturn(Optional.empty());
         Pageable pageable = PageRequest.of(0, 5, Sort.by("title").ascending());
 
         assertThatThrownBy(() -> underTest.getBooksByGenre("genre", pageable))
                 .isInstanceOf(GenreNotFoundException.class);
 
-        verify(genreRepository).findByName("genre");
+        verify(genreRepository).findByNameIgnoreCase("genre");
         verify(bookRepository, never()).getAllByGenre(any(GenreEntity.class), any(Pageable.class));
         verify(bookMapper, never()).bookEntityToBookOverviewDTO(any(BookEntity.class));
     }

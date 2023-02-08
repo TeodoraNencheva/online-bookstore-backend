@@ -41,8 +41,12 @@ public class BookService {
                 .toList();
     }
 
+    public Long getAllBooksCount() {
+        return bookRepository.count();
+    }
+
     public List<BookOverviewDTO> getBooksByGenre(String genre, Pageable pageable) {
-        Optional<GenreEntity> genreOpt = genreRepository.findByName(genre);
+        Optional<GenreEntity> genreOpt = genreRepository.findByNameIgnoreCase(genre);
 
         if (genreOpt.isEmpty()) {
             throw new GenreNotFoundException(genre);
@@ -54,6 +58,16 @@ public class BookService {
                 .stream()
                 .map(bookMapper::bookEntityToBookOverviewDTO)
                 .toList();
+    }
+
+    public Long getBooksCountByGenre(String genre) {
+        Optional<GenreEntity> genreOpt = genreRepository.findByNameIgnoreCase(genre);
+
+        if (genreOpt.isEmpty()) {
+            throw new GenreNotFoundException(genre);
+        }
+
+        return bookRepository.countAllByGenre(genreOpt.get());
     }
 
     public BookDetailsDTO getBookDetails(Long id) {

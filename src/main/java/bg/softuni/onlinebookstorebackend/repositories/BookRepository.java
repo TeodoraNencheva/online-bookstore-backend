@@ -19,4 +19,6 @@ public interface BookRepository extends JpaRepository<BookEntity, Long>,
     void deleteAllByAuthor_Id(Long id);
 
     List<BookEntity> getAllByAuthor(AuthorEntity author);
+
+    Long countAllByGenre(GenreEntity genre);
 }

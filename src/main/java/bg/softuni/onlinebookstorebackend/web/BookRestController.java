@@ -44,6 +44,11 @@ public class BookRestController {
         return ResponseEntity.ok(bookService.getAllBooks(pageable));
     }
 
+    @GetMapping("/all/count")
+    public ResponseEntity<Long> getAllBooksCount() {
+        return ResponseEntity.ok(bookService.getAllBooksCount());
+    }
+
     @GetMapping("/all-genres")
     public ResponseEntity<List<GenreEntity>> getAllGenres() {
         return ResponseEntity.ok(genreService.getAllGenres());
@@ -56,6 +61,11 @@ public class BookRestController {
         Pageable pageable = PageRequest.of(page, size, Sort.by("title").ascending());
 
         return ResponseEntity.ok(bookService.getBooksByGenre(genre, pageable));
+    }
+
+    @GetMapping("/{genre}/count")
+    public ResponseEntity<Long> getBooksCountByGenre(@PathVariable("genre") String genre) {
+        return ResponseEntity.ok(bookService.getBooksCountByGenre(genre));
     }
 
     @GetMapping("/{id}/details")

@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface GenreRepository extends JpaRepository<GenreEntity, Long> {
-    Optional<GenreEntity> findByName(String name);
+    Optional<GenreEntity> findByNameIgnoreCase(String name);
 }
