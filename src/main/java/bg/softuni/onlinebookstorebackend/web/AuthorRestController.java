@@ -41,6 +41,11 @@ public class AuthorRestController {
         return ResponseEntity.ok(authorService.getAllAuthors(pageable));
     }
 
+    @GetMapping("/count")
+    public ResponseEntity<Long> getAuthorCount() {
+        return ResponseEntity.ok(authorService.getAuthorsCount());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<AuthorDetailsDTO> getAuthorDetails(@PathVariable("id") Long id) {
         AuthorDetailsDTO author = authorService.getAuthorDetails(id);

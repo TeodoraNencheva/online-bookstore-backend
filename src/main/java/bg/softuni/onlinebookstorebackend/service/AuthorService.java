@@ -42,6 +42,10 @@ public class AuthorService {
                 .toList();
     }
 
+    public Long getAuthorsCount() {
+        return authorRepository.count();
+    }
+
     public AuthorDetailsDTO getAuthorDetails(Long id) {
         Optional<AuthorEntity> authorOpt = authorRepository.findById(id);
         return authorOpt.map(authorMapper::authorEntityToAuthorDetailsDTO)
