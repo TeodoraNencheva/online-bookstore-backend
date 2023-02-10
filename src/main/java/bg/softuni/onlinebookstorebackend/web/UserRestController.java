@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -66,11 +67,21 @@ public class UserRestController {
         return ResponseEntity.ok(userService.getAllUsersOverview());
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping("/addAdmin/{username}")
     public ResponseEntity<Object> addNewAdmin(@PathVariable("username") String username) {
         userService.addNewAdmin(username);
 
         Map<String, Object> body = ResponseService.generateGeneralResponse(String.format("User %s added as admin", username));
+        return new ResponseEntity<>(body, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @DeleteMapping("/{username}")
+    public ResponseEntity<Object> deleteUser(@PathVariable("username") String username) {
+        userService.deleteUser(username);
+
+        Map<String, Object> body = ResponseService.generateGeneralResponse(String.format("User %s deleted", username));
         return new ResponseEntity<>(body, HttpStatus.OK);
     }
 

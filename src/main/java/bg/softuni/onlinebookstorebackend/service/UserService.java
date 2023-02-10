@@ -239,4 +239,15 @@ public class UserService {
         userRepository.save(user);
         secureTokenRepository.delete(tokenOpt.get());
     }
+
+    @Transactional
+    public void deleteUser(String username) {
+        Optional<UserEntity> userOpt = userRepository.findByEmail(username);
+
+        if (userOpt.isEmpty()) {
+            throw new UsernameNotFoundException(username);
+        }
+
+        userRepository.deleteByEmail(username);
+    }
 }
