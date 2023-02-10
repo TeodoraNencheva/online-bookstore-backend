@@ -24,7 +24,8 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/api/maintenance/**",
             "/api/authors/**",
-            "/api/books/**"
+            "/api/books/**",
+            "/api/auth/register/verify/**"
     };
 
     private final String[] anonymousList = new String[]{
