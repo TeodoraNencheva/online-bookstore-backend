@@ -119,6 +119,7 @@ public class UserService {
         var jwtToken = jwtService.generateToken(userDetailsService.loadUserByUsername(user.getEmail()));
         return AuthenticationResponse.builder()
                 .token(jwtToken)
+                .role(user.getRoles().contains(getAdminRole()) ? "admin" : "user")
                 .build();
     }
 

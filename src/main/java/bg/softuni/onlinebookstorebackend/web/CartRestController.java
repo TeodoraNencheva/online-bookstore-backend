@@ -43,7 +43,7 @@ public class CartRestController {
         return ResponseEntity.notFound().build();
     }
 
-    @DeleteMapping("/{id}/remove")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Object> removeItem(@PathVariable("id") Long bookId,
                                              @AuthenticationPrincipal UserDetails userDetails) {
         userService.removeItemFromCart(bookId, userDetails);
@@ -54,7 +54,7 @@ public class CartRestController {
         return new ResponseEntity<>(body, HttpStatus.OK);
     }
 
-    @DeleteMapping("/removeAll")
+    @DeleteMapping
     public ResponseEntity<Object> removeAllItems(@AuthenticationPrincipal UserDetails userDetails) {
         userService.removeAllItemsFromCart(userDetails);
 

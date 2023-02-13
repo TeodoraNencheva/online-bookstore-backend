@@ -1,5 +1,7 @@
 package bg.softuni.onlinebookstorebackend.service;
 
+import bg.softuni.onlinebookstorebackend.model.dto.book.BookAddedToCartDTO;
+import bg.softuni.onlinebookstorebackend.model.dto.order.OrderDetailsDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.order.OrderListDTO;
 import bg.softuni.onlinebookstorebackend.model.entity.BookEntity;
 import bg.softuni.onlinebookstorebackend.model.entity.OrderEntity;
@@ -74,15 +76,16 @@ public class OrderService {
 
     @PreAuthorize("@orderService.isOwner(#principal.username, #id) or #principal.admin")
     @Transactional
-    public Map<Long, Integer> getOrderItems(UUID id, BookstoreUserDetails principal) {
-        Map<BookEntity, Integer> items = getOrder(id).getItems();
-        Map<Long, Integer> result = new LinkedHashMap<>();
+    public OrderDetailsDTO getOrderItems(UUID id, BookstoreUserDetails principal) {
+        OrderEntity order = getOrder(id);
+        Map<BookEntity, Integer> items = order.getItems();
+        List<BookAddedToCartDTO> result = new ArrayList<>();
 
         for (BookEntity bookEntity : items.keySet()) {
-            result.put(bookEntity.getId(), items.get(bookEntity));
+            result.add(new BookAddedToCartDTO(bookEntity, items.get(bookEntity)));
         }
 
-        return result;
+        return new OrderDetailsDTO(id, result, order.isProcessed(), order.getCreatedAt());
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")

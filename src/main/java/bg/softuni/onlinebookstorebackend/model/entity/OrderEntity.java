@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -41,10 +42,15 @@ public class OrderEntity {
     @Setter
     private boolean processed;
 
+    @Getter
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
     public OrderEntity(UserEntity owner, Map<BookEntity, Integer> items) {
         this.owner = owner;
         setItems(items);
         this.processed = false;
+        this.createdAt = LocalDateTime.now();
     }
 
     public void setItems(Map<BookEntity, Integer> items) {

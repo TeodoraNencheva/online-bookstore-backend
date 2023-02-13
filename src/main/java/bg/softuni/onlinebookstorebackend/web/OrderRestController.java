@@ -1,5 +1,6 @@
 package bg.softuni.onlinebookstorebackend.web;
 
+import bg.softuni.onlinebookstorebackend.model.dto.order.OrderDetailsDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.order.OrderListDTO;
 import bg.softuni.onlinebookstorebackend.model.error.OrderNotFoundException;
 import bg.softuni.onlinebookstorebackend.service.OrderService;
@@ -12,7 +13,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -35,14 +35,10 @@ public class OrderRestController {
     }
 
     @GetMapping("/{id}/details")
-    public ResponseEntity<Object> getOrderDetails(@PathVariable("id") UUID id,
-                                  @AuthenticationPrincipal BookstoreUserDetails principal) {
-        Map<Long, Integer> orderItems = orderService.getOrderItems(id, principal);
-
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("orderId", id);
-        body.put("items", orderItems);
-        return ResponseEntity.ok(body);
+    public ResponseEntity<OrderDetailsDTO> getOrderDetails(@PathVariable("id") UUID id,
+                                                  @AuthenticationPrincipal BookstoreUserDetails principal) {
+        OrderDetailsDTO order = orderService.getOrderItems(id, principal);
+        return ResponseEntity.ok(order);
     }
 
     @PostMapping("/{id}/confirm")
@@ -53,7 +49,7 @@ public class OrderRestController {
         return new ResponseEntity<>(body, HttpStatus.OK);
     }
 
-    @GetMapping("/mine")
+    @GetMapping
     public ResponseEntity<List<OrderListDTO>> getMyOrders(@AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(orderService.getLoggedUserOrders(userDetails));
     }
