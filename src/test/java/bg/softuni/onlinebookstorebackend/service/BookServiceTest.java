@@ -385,7 +385,7 @@ class BookServiceTest {
         bookEntity.getAuthor().setFirstName("John");
         bookEntity.getAuthor().setLastName("Doe");
 
-        BookAddedToCartDTO expected = new BookAddedToCartDTO(bookEntity.getTitle(), bookEntity.getAuthor().getFullName(), 1);
+        BookAddedToCartDTO expected = new BookAddedToCartDTO(bookEntity, 1);
 
         when(bookRepository.findById(anyLong()))
                 .thenReturn(Optional.of(bookEntity));

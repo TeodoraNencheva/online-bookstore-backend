@@ -1,6 +1,7 @@
 package bg.softuni.onlinebookstorebackend.service;
 
 import bg.softuni.onlinebookstorebackend.model.dto.book.AddBookToCartDTO;
+import bg.softuni.onlinebookstorebackend.model.dto.book.BookAddedToCartDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.response.AuthenticationResponse;
 import bg.softuni.onlinebookstorebackend.model.dto.user.LoginDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.user.UserOverviewDTO;
@@ -32,10 +33,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -145,12 +143,12 @@ public class UserService {
 
 
     @Transactional
-    public Map<Long, Integer> getUserCart(UserDetails userDetails) {
+    public List<BookAddedToCartDTO> getUserCart(UserDetails userDetails) {
         Map<BookEntity, Integer> cart = getUser(userDetails).getCart();
-        Map<Long, Integer> result = new LinkedHashMap<>();
+        List<BookAddedToCartDTO> result = new ArrayList<>();
 
         for (BookEntity bookEntity : cart.keySet()) {
-            result.put(bookEntity.getId(), cart.get(bookEntity));
+            result.add(new BookAddedToCartDTO(bookEntity, cart.get(bookEntity)));
         }
 
         return result;

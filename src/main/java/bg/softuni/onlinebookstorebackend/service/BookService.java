@@ -169,7 +169,6 @@ public class BookService {
         }
 
         BookEntity book = bookOpt.get();
-        return new BookAddedToCartDTO(book.getTitle(), book.getAuthor().getFullName(),
-                bookDTO.getQuantity());
+        return new BookAddedToCartDTO(book, bookDTO.getQuantity());
     }
 }

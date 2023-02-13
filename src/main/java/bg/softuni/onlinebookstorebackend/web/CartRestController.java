@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.List;
 import java.util.Map;
 
 @CrossOrigin("*")
@@ -28,9 +29,8 @@ public class CartRestController {
     private final BookService bookService;
 
     @GetMapping
-    public ResponseEntity<Map<Long, Integer>> getCart(@AuthenticationPrincipal UserDetails userDetails) {
-        Map<Long, Integer> userCart = userService.getUserCart(userDetails);
-        return ResponseEntity.ok(userCart);
+    public ResponseEntity<List<BookAddedToCartDTO>> getCart(@AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(userService.getUserCart(userDetails));
     }
 
     @PostMapping(consumes = "application/json", produces = "application/json")
@@ -45,7 +45,7 @@ public class CartRestController {
 
     @DeleteMapping("/{id}/remove")
     public ResponseEntity<Object> removeItem(@PathVariable("id") Long bookId,
-                                                      @AuthenticationPrincipal UserDetails userDetails) {
+                                             @AuthenticationPrincipal UserDetails userDetails) {
         userService.removeItemFromCart(bookId, userDetails);
 
         Map<String, Object> body = ResponseService.generateGeneralResponse(
