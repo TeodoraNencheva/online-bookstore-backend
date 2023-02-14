@@ -2,6 +2,7 @@ package bg.softuni.onlinebookstorebackend.web;
 
 import bg.softuni.onlinebookstorebackend.model.dto.author.AddNewAuthorDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.author.AuthorDetailsDTO;
+import bg.softuni.onlinebookstorebackend.model.dto.author.AuthorNameDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.author.AuthorOverviewDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.search.SearchDTO;
 import bg.softuni.onlinebookstorebackend.model.entity.AuthorEntity;
@@ -39,6 +40,11 @@ public class AuthorRestController {
         Pageable pageable = PageRequest.of(page, size, Sort.by("lastName").ascending());
 
         return ResponseEntity.ok(authorService.getAllAuthors(pageable));
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<List<AuthorNameDTO>> getAllAuthorsList() {
+        return ResponseEntity.ok(authorService.getAllAuthorsList());
     }
 
     @GetMapping("/count")

@@ -132,14 +132,14 @@ class BookServiceTest {
         when(genreRepository.findById(anyLong())).thenReturn(Optional.of(new GenreEntity()));
 
         MockMultipartFile picture = new MockMultipartFile("picture.png", "picture.png", "multipart/form-data", new byte[]{});
-        AddNewBookDTO bookModel = new AddNewBookDTO("title", 1L, 1L, "2000", "summary", picture, new BigDecimal("20"));
+        AddNewBookDTO bookModel = new AddNewBookDTO("title", 1L, 1L, "2000", "summary", new BigDecimal("20"));
 
         CloudinaryImage cloudinaryImage = new CloudinaryImage("url", "publicId");
         BookEntity expected = new BookEntity(bookModel, new AuthorEntity(), new GenreEntity(), new PictureEntity(cloudinaryImage));
 
         when(cloudinaryService.upload(any(MultipartFile.class))).thenReturn(cloudinaryImage);
 
-        underTest.addNewBook(bookModel);
+        underTest.addNewBook(bookModel, picture);
 
         ArgumentCaptor<BookEntity> argumentCaptor =
                 ArgumentCaptor.forClass(BookEntity.class);
@@ -159,7 +159,7 @@ class BookServiceTest {
         when(authorRepository.findById(anyLong())).thenReturn(Optional.of(new AuthorEntity()));
         when(genreRepository.findById(anyLong())).thenReturn(Optional.of(new GenreEntity()));
 
-        AddNewBookDTO bookModel = new AddNewBookDTO("title", 1L, 1L, "2000", "summary", null, new BigDecimal("20"));
+        AddNewBookDTO bookModel = new AddNewBookDTO("title", 1L, 1L, "2000", "summary", new BigDecimal("20"));
 
         BookEntity expected = new BookEntity(bookModel, new AuthorEntity(), new GenreEntity(), null);
 
@@ -183,7 +183,7 @@ class BookServiceTest {
         when(authorRepository.findById(anyLong())).thenReturn(Optional.empty());
         when(genreRepository.findById(anyLong())).thenReturn(Optional.of(new GenreEntity()));
 
-        AddNewBookDTO bookModel = new AddNewBookDTO("title", 1L, 1L, "2000", "summary", null, new BigDecimal("20"));
+        AddNewBookDTO bookModel = new AddNewBookDTO("title", 1L, 1L, "2000", "summary", new BigDecimal("20"));
 
         assertThatThrownBy(() -> underTest.addNewBook(bookModel))
                 .isInstanceOf(AuthorNotFoundException.class);
@@ -200,7 +200,7 @@ class BookServiceTest {
         when(authorRepository.findById(anyLong())).thenReturn(Optional.of(new AuthorEntity()));
         when(genreRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        AddNewBookDTO bookModel = new AddNewBookDTO("title", 1L, 1L, "2000", "summary", null, new BigDecimal("20"));
+        AddNewBookDTO bookModel = new AddNewBookDTO("title", 1L, 1L, "2000", "summary", new BigDecimal("20"));
 
         assertThatThrownBy(() -> underTest.addNewBook(bookModel))
                 .isInstanceOf(GenreNotFoundException.class);
@@ -219,14 +219,14 @@ class BookServiceTest {
         when(genreRepository.findById(anyLong())).thenReturn(Optional.of(new GenreEntity()));
 
         MockMultipartFile picture = new MockMultipartFile("picture.png", "picture.png", "multipart/form-data", new byte[]{});
-        AddNewBookDTO bookModel = new AddNewBookDTO("title", 1L, 1L, "2000", "summary", picture, new BigDecimal("20"));
+        AddNewBookDTO bookModel = new AddNewBookDTO("title", 1L, 1L, "2000", "summary", new BigDecimal("20"));
 
         CloudinaryImage cloudinaryImage = new CloudinaryImage("url", "publicId");
         BookEntity expected = new BookEntity(bookModel, new AuthorEntity(), new GenreEntity(), new PictureEntity(cloudinaryImage));
 
         when(cloudinaryService.upload(any(MultipartFile.class))).thenReturn(cloudinaryImage);
 
-        underTest.updateBook(bookModel, 1L);
+        underTest.updateBook(bookModel, 1L, picture);
 
         ArgumentCaptor<BookEntity> argumentCaptor =
                 ArgumentCaptor.forClass(BookEntity.class);
@@ -248,7 +248,7 @@ class BookServiceTest {
         when(authorRepository.findById(anyLong())).thenReturn(Optional.of(new AuthorEntity()));
         when(genreRepository.findById(anyLong())).thenReturn(Optional.of(new GenreEntity()));
 
-        AddNewBookDTO bookModel = new AddNewBookDTO("title", 1L, 1L, "2000", "summary", null, new BigDecimal("20"));
+        AddNewBookDTO bookModel = new AddNewBookDTO("title", 1L, 1L, "2000", "summary", new BigDecimal("20"));
 
         BookEntity expected = new BookEntity(bookModel, new AuthorEntity(), new GenreEntity(), null);
 
@@ -272,7 +272,7 @@ class BookServiceTest {
     void updateBookThrowsWhenBookDoesNotExist() throws IOException {
         when(bookRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        AddNewBookDTO bookModel = new AddNewBookDTO("title", 1L, 1L, "2000", "summary", null, new BigDecimal("20"));
+        AddNewBookDTO bookModel = new AddNewBookDTO("title", 1L, 1L, "2000", "summary", new BigDecimal("20"));
 
         assertThatThrownBy(() -> underTest.updateBook(bookModel, 1L))
                 .isInstanceOf(BookNotFoundException.class);
@@ -291,7 +291,7 @@ class BookServiceTest {
         when(authorRepository.findById(anyLong())).thenReturn(Optional.empty());
         when(genreRepository.findById(anyLong())).thenReturn(Optional.of(new GenreEntity()));
 
-        AddNewBookDTO bookModel = new AddNewBookDTO("title", 1L, 1L, "2000", "summary", null, new BigDecimal("20"));
+        AddNewBookDTO bookModel = new AddNewBookDTO("title", 1L, 1L, "2000", "summary", new BigDecimal("20"));
 
         assertThatThrownBy(() -> underTest.updateBook(bookModel, 1L))
                 .isInstanceOf(AuthorNotFoundException.class);
@@ -310,7 +310,7 @@ class BookServiceTest {
         when(authorRepository.findById(anyLong())).thenReturn(Optional.of(new AuthorEntity()));
         when(genreRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        AddNewBookDTO bookModel = new AddNewBookDTO("title", 1L, 1L, "2000", "summary", null, new BigDecimal("20"));
+        AddNewBookDTO bookModel = new AddNewBookDTO("title", 1L, 1L, "2000", "summary", new BigDecimal("20"));
 
         assertThatThrownBy(() -> underTest.updateBook(bookModel, 1L))
                 .isInstanceOf(GenreNotFoundException.class);

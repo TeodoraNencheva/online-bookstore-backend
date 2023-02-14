@@ -26,6 +26,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -59,7 +60,7 @@ public class BookRestControllerIT {
         picture = new MockMultipartFile("picture", "picture.png",
                 "multipart/form-data", new byte[]{});
         bookDto = new AddNewBookDTO("Pod igoto", 1L, 1L, "1894",
-                "some summary", null, new BigDecimal(20));
+                "some summary", new BigDecimal(20));
 
         objectMapper = new ObjectMapper();
         book = new MockMultipartFile("bookModel", "",
@@ -148,19 +149,25 @@ public class BookRestControllerIT {
     @WithMockUser(authorities = "ROLE_ADMIN")
     @Test
     void adminCanAddNewBook() throws Exception {
-        BookEntity toReturn = new BookEntity();
-        toReturn.setId(1L);
+        PictureEntity bookPicture = new PictureEntity();
+        bookPicture.setUrl("picture url");
+        BookEntity toReturn = new BookEntity(bookDto, testAuthor, new GenreEntity("novel"), bookPicture);
 
-        when(bookService.addNewBook(any(AddNewBookDTO.class)))
+        when(bookService.addNewBook(any(AddNewBookDTO.class), any(MultipartFile.class)))
                 .thenReturn(toReturn);
 
         mockMvc.perform(multipart("/api/books/add")
                         .file(book)
                         .file(picture))
-                .andExpect(status().isCreated())
-                .andExpect(header().exists("Location"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Pod igoto"))
+                .andExpect(jsonPath("$.author.fullName").value("Ivan Vazov"))
+                .andExpect(jsonPath("$.genre.name").value("novel"))
+                .andExpect(jsonPath("$.yearOfPublication").value("1894"))
+                .andExpect(jsonPath("$.picture.url").value("picture url"))
+                .andExpect(jsonPath("$.price").value("20"));
 
-        verify(bookService, times(1)).addNewBook(any(AddNewBookDTO.class));
+        verify(bookService, times(1)).addNewBook(any(AddNewBookDTO.class), any(MultipartFile.class));
     }
 
     @WithMockUser(authorities = "ROLE_USER")

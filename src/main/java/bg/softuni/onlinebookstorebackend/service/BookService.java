@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -77,7 +78,12 @@ public class BookService {
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public BookEntity addNewBook(AddNewBookDTO bookModel) throws IOException {
+    public void addNewBook(AddNewBookDTO bookModel) throws IOException {
+        addNewBook(bookModel, null);
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public BookEntity addNewBook(AddNewBookDTO bookModel, MultipartFile file) throws IOException {
         Optional<AuthorEntity> authorOpt = authorRepository.findById(bookModel.getAuthorId());
         Optional<GenreEntity> genreOpt = genreRepository.findById(bookModel.getGenreId());
 
@@ -89,8 +95,8 @@ public class BookService {
             throw new GenreNotFoundException("with ID " + bookModel.getGenreId().toString());
         }
 
-        if (bookModel.getPicture() != null && !Objects.requireNonNull(bookModel.getPicture().getOriginalFilename()).isEmpty()) {
-            PictureEntity picture = new PictureEntity(cloudinaryService.upload(bookModel.getPicture()));
+        if (file != null && !Objects.requireNonNull(file.getOriginalFilename()).isEmpty()) {
+            PictureEntity picture = new PictureEntity(cloudinaryService.upload(file));
             pictureRepository.save(picture);
             BookEntity newBook = new BookEntity(bookModel, authorOpt.get(), genreOpt.get(), picture);
             return bookRepository.save(newBook);
@@ -102,6 +108,11 @@ public class BookService {
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public BookEntity updateBook(AddNewBookDTO bookModel, Long id) throws IOException {
+        return updateBook(bookModel, id, null);
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public BookEntity updateBook(AddNewBookDTO bookModel, Long id, MultipartFile file) throws IOException {
         Optional<BookEntity> bookOpt = bookRepository.findById(id);
         if (bookOpt.isEmpty()) {
             throw new BookNotFoundException(id);
@@ -125,8 +136,8 @@ public class BookService {
         book.setYearOfPublication(bookModel.getYearOfPublication());
         book.setSummary(bookModel.getSummary());
 
-        if (bookModel.getPicture() != null && !Objects.requireNonNull(bookModel.getPicture().getOriginalFilename()).isEmpty()) {
-            PictureEntity picture = new PictureEntity(cloudinaryService.upload(bookModel.getPicture()));
+        if (file != null && !Objects.requireNonNull(file.getOriginalFilename()).isEmpty()) {
+            PictureEntity picture = new PictureEntity(cloudinaryService.upload(file));
             pictureRepository.save(picture);
             book.setPicture(picture);
         }

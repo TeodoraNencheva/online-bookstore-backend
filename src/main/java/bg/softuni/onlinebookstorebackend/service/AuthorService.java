@@ -2,6 +2,7 @@ package bg.softuni.onlinebookstorebackend.service;
 
 import bg.softuni.onlinebookstorebackend.model.dto.author.AddNewAuthorDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.author.AuthorDetailsDTO;
+import bg.softuni.onlinebookstorebackend.model.dto.author.AuthorNameDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.author.AuthorOverviewDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.search.SearchDTO;
 import bg.softuni.onlinebookstorebackend.model.entity.AuthorEntity;
@@ -39,6 +40,14 @@ public class AuthorService {
                 .getContent()
                 .stream()
                 .map(authorMapper::authorEntityToAuthorOverviewDTO)
+                .toList();
+    }
+
+    public List<AuthorNameDTO> getAllAuthorsList() {
+        return authorRepository
+                .findAll()
+                .stream()
+                .map(authorMapper::authorEntityToAuthorNameDTO)
                 .toList();
     }
 

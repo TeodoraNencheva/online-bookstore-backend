@@ -31,8 +31,6 @@ public class AddNewBookDTO {
     @NotEmpty
     private String summary;
 
-    private MultipartFile picture;
-
     @NotNull
     @Positive
     private BigDecimal price;
