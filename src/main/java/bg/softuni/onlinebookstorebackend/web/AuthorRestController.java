@@ -19,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.List;
@@ -61,18 +60,11 @@ public class AuthorRestController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping(path = "/add", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<AuthorEntity> addAuthor(@Valid @RequestPart(name = "authorModel") AddNewAuthorDTO authorModel,
-                                                  @RequestPart(name = "picture", required = false) MultipartFile picture,
-                                                  UriComponentsBuilder uriComponentsBuilder) throws IOException {
-        if (picture != null) {
-            authorModel.setPicture(picture);
-        }
+                                                  @RequestPart(name = "picture", required = false) MultipartFile picture) throws IOException {
 
-        AuthorEntity newAuthor = authorService.addNewAuthor(authorModel);
+        AuthorEntity newAuthor = authorService.addNewAuthor(authorModel, picture);
 
-        return ResponseEntity
-                .created(uriComponentsBuilder.path("/api/authors/{id}")
-                        .build(newAuthor.getId()))
-                .build();
+        return ResponseEntity.ok(newAuthor);
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -80,11 +72,8 @@ public class AuthorRestController {
     public ResponseEntity<AuthorEntity> updateAuthor(@Valid @RequestPart(name = "authorModel") AddNewAuthorDTO authorModel,
                                                      @RequestPart(name = "picture", required = false) MultipartFile picture,
                                                      @PathVariable("id") Long id) throws IOException {
-        if (picture != null) {
-            authorModel.setPicture(picture);
-        }
 
-        AuthorEntity updatedAuthor = authorService.updateAuthor(authorModel, id);
+        AuthorEntity updatedAuthor = authorService.updateAuthor(authorModel, id, picture);
         return ResponseEntity.ok(updatedAuthor);
     }
 

@@ -21,6 +21,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -48,8 +49,7 @@ class AuthorRestControllerTest {
     void setUp() throws JsonProcessingException {
         picture = new MockMultipartFile("picture", "picture.png",
                 "multipart/form-data", new byte[]{});
-        authorDto = new AddNewAuthorDTO("Ivan", "Vazov",
-                "biography", null);
+        authorDto = new AddNewAuthorDTO("Ivan", "Vazov", "biography");
 
         objectMapper = new ObjectMapper();
         author = new MockMultipartFile("authorModel", "",
@@ -101,19 +101,20 @@ class AuthorRestControllerTest {
     @WithMockUser(authorities = "ROLE_ADMIN")
     @Test
     void adminCanAddNewAuthor() throws Exception {
-        AuthorEntity toReturn = new AuthorEntity();
-        toReturn.setId(1L);
+        AuthorEntity toReturn = new AuthorEntity(authorDto);
 
-        when(authorService.addNewAuthor(any(AddNewAuthorDTO.class)))
+        when(authorService.addNewAuthor(any(AddNewAuthorDTO.class), any(MultipartFile.class)))
                 .thenReturn(toReturn);
 
         mockMvc.perform(multipart("/api/authors/add")
                         .file(author)
                         .file(picture))
-                .andExpect(status().isCreated())
-                .andExpect(header().exists("Location"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value("Ivan"))
+                .andExpect(jsonPath("$.lastName").value("Vazov"))
+                .andExpect(jsonPath("$.biography").value("biography"));
 
-        verify(authorService, times(1)).addNewAuthor(any(AddNewAuthorDTO.class));
+        verify(authorService, times(1)).addNewAuthor(any(AddNewAuthorDTO.class), any(MultipartFile.class));
     }
 
     @WithMockUser(authorities = "ROLE_USER")
@@ -143,7 +144,7 @@ class AuthorRestControllerTest {
     void adminCanUpdateAuthor() throws Exception {
         AuthorEntity toReturn = new AuthorEntity(authorDto);
 
-        when(authorService.updateAuthor(any(AddNewAuthorDTO.class), anyLong()))
+        when(authorService.updateAuthor(any(AddNewAuthorDTO.class), anyLong(), any(MultipartFile.class)))
                 .thenReturn(toReturn);
 
         mockMvc.perform(multipart(HttpMethod.PUT, "/api/authors/{id}", 1L)
@@ -154,13 +155,13 @@ class AuthorRestControllerTest {
                 .andExpect(jsonPath("$.lastName").value("Vazov"))
                 .andExpect(jsonPath("$.biography").value("biography"));
 
-        verify(authorService, times(1)).updateAuthor(any(AddNewAuthorDTO.class), anyLong());
+        verify(authorService, times(1)).updateAuthor(any(AddNewAuthorDTO.class), anyLong(), any(MultipartFile.class));
     }
 
     @WithMockUser(authorities = "ROLE_ADMIN")
     @Test
     void adminCannotUpdateAuthorWhenAuthorDoesNotExist() throws Exception {
-        when(authorService.updateAuthor(any(AddNewAuthorDTO.class), anyLong()))
+        when(authorService.updateAuthor(any(AddNewAuthorDTO.class), anyLong(), any(MultipartFile.class)))
                 .thenThrow(new AuthorNotFoundException(1L));
 
         mockMvc.perform(multipart(HttpMethod.PUT, "/api/authors/{id}", 1L)
@@ -170,7 +171,7 @@ class AuthorRestControllerTest {
                 .andExpect(jsonPath("$.message").value("Author with ID 1 not found"));
 
         verify(authorService, times(1))
-                .updateAuthor(any(AddNewAuthorDTO.class), anyLong());
+                .updateAuthor(any(AddNewAuthorDTO.class), anyLong(), any(MultipartFile.class));
     }
 
     @WithMockUser(authorities = "ROLE_USER")

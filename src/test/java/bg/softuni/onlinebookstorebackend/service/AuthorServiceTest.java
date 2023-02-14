@@ -97,13 +97,13 @@ public class AuthorServiceTest {
     @Test
     void canAddAuthorWithPicture() throws IOException {
         picture = new MockMultipartFile("picture.png", "picture.png", "multipart/form-data", new byte[]{});
-        authorModel = new AddNewAuthorDTO("Ivan", "Vazov", "biography", picture);
+        authorModel = new AddNewAuthorDTO("Ivan", "Vazov", "biography");
 
         CloudinaryImage cloudinaryImage = new CloudinaryImage("url", "publicId");
         AuthorEntity expected = new AuthorEntity(authorModel, new PictureEntity(cloudinaryImage));
 
         when(cloudinaryService.upload(any(MultipartFile.class))).thenReturn(cloudinaryImage);
-        underTest.addNewAuthor(authorModel);
+        underTest.addNewAuthor(authorModel, picture);
 
         ArgumentCaptor<AuthorEntity> argumentCaptor =
                 ArgumentCaptor.forClass(AuthorEntity.class);
@@ -118,7 +118,7 @@ public class AuthorServiceTest {
 
     @Test
     void canAddAuthorWithoutPicture() throws IOException {
-        authorModel = new AddNewAuthorDTO("Ivan", "Vazov", "biography", null);
+        authorModel = new AddNewAuthorDTO("Ivan", "Vazov", "biography");
         AuthorEntity expected = new AuthorEntity(authorModel, null);
 
         underTest.addNewAuthor(authorModel);
@@ -136,14 +136,14 @@ public class AuthorServiceTest {
     @Test
     void canUpdateAuthorWithPicture() throws IOException {
         picture = new MockMultipartFile("picture.png", "picture.png", "multipart/form-data", new byte[]{});
-        authorModel = new AddNewAuthorDTO("Ivan", "Vazov", "biography", picture);
+        authorModel = new AddNewAuthorDTO("Ivan", "Vazov", "biography");
 
         CloudinaryImage cloudinaryImage = new CloudinaryImage("url", "publicId");
         AuthorEntity expected = new AuthorEntity(authorModel, new PictureEntity(cloudinaryImage));
 
         when(cloudinaryService.upload(any(MultipartFile.class))).thenReturn(cloudinaryImage);
         when(authorRepository.findById(1L)).thenReturn(Optional.of(new AuthorEntity()));
-        underTest.updateAuthor(authorModel, 1L);
+        underTest.updateAuthor(authorModel, 1L, picture);
 
         ArgumentCaptor<AuthorEntity> argumentCaptor =
                 ArgumentCaptor.forClass(AuthorEntity.class);
@@ -159,11 +159,11 @@ public class AuthorServiceTest {
 
     @Test
     void canUpdateAuthorWithoutPicture() throws IOException {
-        authorModel = new AddNewAuthorDTO("Ivan", "Vazov", "biography", picture);
+        authorModel = new AddNewAuthorDTO("Ivan", "Vazov", "biography");
         AuthorEntity expected = new AuthorEntity(authorModel, null);
 
         when(authorRepository.findById(1L)).thenReturn(Optional.of(new AuthorEntity()));
-        underTest.updateAuthor(authorModel, 1L);
+        underTest.updateAuthor(authorModel, 1L, picture);
 
         ArgumentCaptor<AuthorEntity> argumentCaptor =
                 ArgumentCaptor.forClass(AuthorEntity.class);
@@ -180,10 +180,10 @@ public class AuthorServiceTest {
     @Test
     void cannotUpdateAuthorWhenAuthorDoesNotExist() throws IOException {
         picture = new MockMultipartFile("picture.png", "picture.png", "multipart/form-data", new byte[]{});
-        authorModel = new AddNewAuthorDTO("Ivan", "Vazov", "biography", picture);
+        authorModel = new AddNewAuthorDTO("Ivan", "Vazov", "biography");
 
         when(authorRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> underTest.updateAuthor(authorModel, 1L))
+        assertThatThrownBy(() -> underTest.updateAuthor(authorModel, 1L, picture))
                 .isInstanceOf(AuthorNotFoundException.class);
 
         verify(authorRepository).findById(1L);

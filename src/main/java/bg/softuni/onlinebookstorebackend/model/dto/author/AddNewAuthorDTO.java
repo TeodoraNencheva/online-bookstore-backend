@@ -4,7 +4,6 @@ import bg.softuni.onlinebookstorebackend.model.entity.AuthorEntity;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,8 +18,6 @@ public class AddNewAuthorDTO {
 
     @NotEmpty
     private String biography;
-
-    private MultipartFile picture;
 
     public AddNewAuthorDTO(AuthorEntity author) {
         this.firstName = author.getFirstName();

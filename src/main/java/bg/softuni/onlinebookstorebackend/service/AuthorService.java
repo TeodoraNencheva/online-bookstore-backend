@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -63,8 +64,13 @@ public class AuthorService {
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public AuthorEntity addNewAuthor(AddNewAuthorDTO authorModel) throws IOException {
-        if (authorModel.getPicture() != null && !Objects.requireNonNull(authorModel.getPicture().getOriginalFilename()).isEmpty()) {
-            PictureEntity picture = new PictureEntity(cloudinaryService.upload(authorModel.getPicture()));
+        return addNewAuthor(authorModel, null);
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public AuthorEntity addNewAuthor(AddNewAuthorDTO authorModel, MultipartFile file) throws IOException {
+        if (file != null && !Objects.requireNonNull(file.getOriginalFilename()).isEmpty()) {
+            PictureEntity picture = new PictureEntity(cloudinaryService.upload(file));
             pictureRepository.save(picture);
             AuthorEntity newAuthor = new AuthorEntity(authorModel, picture);
             return authorRepository.save(newAuthor);
@@ -76,6 +82,11 @@ public class AuthorService {
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public AuthorEntity updateAuthor(AddNewAuthorDTO authorModel, Long id) throws IOException {
+        return updateAuthor(authorModel, id, null);
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public AuthorEntity updateAuthor(AddNewAuthorDTO authorModel, Long id, MultipartFile file) throws IOException {
         Optional<AuthorEntity> authorOpt = authorRepository.findById(id);
         if (authorOpt.isEmpty()) {
             throw new AuthorNotFoundException(id);
@@ -86,8 +97,8 @@ public class AuthorService {
         author.setLastName(authorModel.getLastName());
         author.setBiography(authorModel.getBiography());
 
-        if (authorModel.getPicture() != null && !Objects.requireNonNull(authorModel.getPicture().getOriginalFilename()).isEmpty()) {
-            PictureEntity picture = new PictureEntity(cloudinaryService.upload(authorModel.getPicture()));
+        if (file != null && !Objects.requireNonNull(file.getOriginalFilename()).isEmpty()) {
+            PictureEntity picture = new PictureEntity(cloudinaryService.upload(file));
             pictureRepository.save(picture);
             author.setPicture(picture);
         }
