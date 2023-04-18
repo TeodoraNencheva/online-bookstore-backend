@@ -1,6 +1,6 @@
 package bg.softuni.onlinebookstorebackend.model.validation;
 
-import bg.softuni.onlinebookstorebackend.repositories.AuthorRepository;
+import bg.softuni.onlinebookstorebackend.repositories.BookRepository;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;
@@ -8,11 +8,11 @@ import lombok.RequiredArgsConstructor;
 import java.util.Objects;
 
 @RequiredArgsConstructor
-public class ExistingAuthorIdValidator implements ConstraintValidator<ExistingAuthorId, Long> {
-    private final AuthorRepository authorRepository;
+public class ExistingBookIdValidator implements ConstraintValidator<ExistingBookId, Long> {
+    private final BookRepository bookRepository;
 
     @Override
     public boolean isValid(Long value, ConstraintValidatorContext context) {
-        return Objects.nonNull(value) && authorRepository.findById(value).isPresent();
+        return Objects.nonNull(value) && bookRepository.findById(value).isPresent();
     }
 }

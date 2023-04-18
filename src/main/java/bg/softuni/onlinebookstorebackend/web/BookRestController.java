@@ -6,6 +6,9 @@ import bg.softuni.onlinebookstorebackend.model.dto.book.BookOverviewDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.search.SearchDTO;
 import bg.softuni.onlinebookstorebackend.model.entity.BookEntity;
 import bg.softuni.onlinebookstorebackend.model.entity.GenreEntity;
+import bg.softuni.onlinebookstorebackend.model.validation.ExistingAuthorId;
+import bg.softuni.onlinebookstorebackend.model.validation.ExistingBookId;
+import bg.softuni.onlinebookstorebackend.model.validation.ExistingGenre;
 import bg.softuni.onlinebookstorebackend.service.BookService;
 import bg.softuni.onlinebookstorebackend.service.GenreService;
 import bg.softuni.onlinebookstorebackend.service.ResponseService;
@@ -18,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,6 +33,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/books")
+@Validated
 public class BookRestController {
     private final BookService bookService;
     private final GenreService genreService;
@@ -53,7 +58,7 @@ public class BookRestController {
     }
 
     @GetMapping("/{genre}")
-    public ResponseEntity<List<BookOverviewDTO>> getBooksByGenre(@PathVariable("genre") String genre,
+    public ResponseEntity<List<BookOverviewDTO>> getBooksByGenre(@ExistingGenre @PathVariable("genre") String genre,
                                                                  @RequestParam(value = "size", defaultValue = "5") int size,
                                                                  @RequestParam(value = "page", defaultValue = "0") int page) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("title").ascending());
@@ -62,12 +67,12 @@ public class BookRestController {
     }
 
     @GetMapping("/{genre}/count")
-    public ResponseEntity<Long> getBooksCountByGenre(@PathVariable("genre") String genre) {
+    public ResponseEntity<Long> getBooksCountByGenre(@ExistingGenre @PathVariable("genre") String genre) {
         return ResponseEntity.ok(bookService.getBooksCountByGenre(genre));
     }
 
     @GetMapping("/{id}/details")
-    public ResponseEntity<BookDetailsDTO> getBookDetails(@PathVariable("id") Long id) {
+    public ResponseEntity<BookDetailsDTO> getBookDetails(@ExistingBookId @PathVariable("id") Long id) {
         BookDetailsDTO bookDetails = bookService.getBookDetails(id);
         return ResponseEntity.ok(bookDetails);
     }
@@ -85,14 +90,14 @@ public class BookRestController {
     @PutMapping(path = "/{id}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<BookEntity> updateBook(@Valid @RequestPart(name = "bookModel") AddNewBookDTO bookModel,
                                                  @RequestPart(name = "picture", required = false) MultipartFile picture,
-                                                 @PathVariable("id") Long id) throws IOException {
+                                                 @ExistingBookId @PathVariable("id") Long id) throws IOException {
         BookEntity updatedBook = this.bookService.updateBook(bookModel, id, picture);
         return ResponseEntity.ok(updatedBook);
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteBook(@PathVariable("id") Long id) {
+    public ResponseEntity<Object> deleteBook(@ExistingBookId @PathVariable("id") Long id) {
         bookService.deleteBook(id);
 
         Map<String, Object> body = ResponseService.generateGeneralResponse(String.format("Book with ID %s deleted", id));
@@ -111,7 +116,7 @@ public class BookRestController {
 
     @GetMapping
     public ResponseEntity<List<BookOverviewDTO>> getBooksByAuthor(
-            @RequestParam(value = "authorId") Long authorId) {
+            @ExistingAuthorId @RequestParam(value = "authorId") Long authorId) {
         return ResponseEntity.ok(bookService.getBooksByAuthor(authorId));
     }
 }

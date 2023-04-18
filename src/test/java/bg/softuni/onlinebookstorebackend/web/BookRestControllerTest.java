@@ -8,9 +8,9 @@ import bg.softuni.onlinebookstorebackend.model.entity.AuthorEntity;
 import bg.softuni.onlinebookstorebackend.model.entity.BookEntity;
 import bg.softuni.onlinebookstorebackend.model.entity.GenreEntity;
 import bg.softuni.onlinebookstorebackend.model.entity.PictureEntity;
-import bg.softuni.onlinebookstorebackend.model.exception.AuthorNotFoundException;
-import bg.softuni.onlinebookstorebackend.model.exception.BookNotFoundException;
-import bg.softuni.onlinebookstorebackend.model.exception.GenreNotFoundException;
+import bg.softuni.onlinebookstorebackend.repositories.AuthorRepository;
+import bg.softuni.onlinebookstorebackend.repositories.BookRepository;
+import bg.softuni.onlinebookstorebackend.repositories.GenreRepository;
 import bg.softuni.onlinebookstorebackend.service.BookService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,19 +30,27 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class BookRestControllerIT {
+public class BookRestControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
     private BookService bookService;
+    @MockBean
+    private BookRepository bookRepository;
+    @MockBean
+    private GenreRepository genreRepository;
+    @MockBean
+    private AuthorRepository authorRepository;
 
     private AuthorEntity testAuthor;
     private MockMultipartFile picture;
@@ -86,6 +94,7 @@ public class BookRestControllerIT {
 
     @Test
     void canGetBooksByGenre() throws Exception {
+        when(genreRepository.findByNameIgnoreCase(anyString())).thenReturn(Optional.of(new GenreEntity()));
         when(bookService.getBooksByGenre(anyString(), any(Pageable.class)))
                 .thenReturn(List.of(new BookOverviewDTO(1L, "Pod igoto", testAuthor, "novel", "picture")));
 
@@ -103,18 +112,18 @@ public class BookRestControllerIT {
 
     @Test
     void cannotGetBookByGenreWhenGenreDoesNotExist() throws Exception {
-        when(bookService.getBooksByGenre(anyString(), any(Pageable.class)))
-                .thenThrow(new GenreNotFoundException("novel"));
+        when(genreRepository.findByNameIgnoreCase(anyString())).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/books/{genre}", "novel"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Genre novel not found"));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Invalid genre name"));
 
-        verify(bookService, times(1)).getBooksByGenre(anyString(), any(Pageable.class));
+        verify(bookService, never()).getBooksByGenre(anyString(), any(Pageable.class));
     }
 
     @Test
     void canGetBookDetails() throws Exception {
+        when(bookRepository.findById(anyLong())).thenReturn(Optional.of(new BookEntity()));
         when(bookService.getBookDetails(anyLong()))
                 .thenReturn(new BookDetailsDTO(1L, "Pod igoto", testAuthor, "novel",
                         "1894", "some summary", "some picture",
@@ -136,14 +145,13 @@ public class BookRestControllerIT {
 
     @Test
     void cannotGetBookDetailsWhenBookDoesNotExist() throws Exception {
-        when(bookService.getBookDetails(anyLong()))
-                .thenThrow(new BookNotFoundException(1L));
+        when(bookRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/books/{id}/details", 1L))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Book with ID 1 not found"));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Invalid book ID"));
 
-        verify(bookService, times(1)).getBookDetails(1L);
+        verify(bookService, never()).getBookDetails(1L);
     }
 
     @WithMockUser(authorities = "ROLE_ADMIN")
@@ -153,6 +161,7 @@ public class BookRestControllerIT {
         bookPicture.setUrl("picture url");
         BookEntity toReturn = new BookEntity(bookDto, testAuthor, new GenreEntity("novel"), bookPicture);
 
+        when(authorRepository.findById(anyLong())).thenReturn(Optional.of(new AuthorEntity()));
         when(bookService.addNewBook(any(AddNewBookDTO.class), any(MultipartFile.class)))
                 .thenReturn(toReturn);
 
@@ -173,6 +182,8 @@ public class BookRestControllerIT {
     @WithMockUser(authorities = "ROLE_USER")
     @Test
     void userCannotAddNewBook() throws Exception {
+        when(authorRepository.findById(anyLong())).thenReturn(Optional.of(new AuthorEntity()));
+
         mockMvc.perform(multipart("/api/books/add")
                         .file(book)
                         .file(picture))
@@ -199,6 +210,8 @@ public class BookRestControllerIT {
         bookPicture.setUrl("picture url");
         BookEntity toReturn = new BookEntity(bookDto, testAuthor, new GenreEntity("novel"), bookPicture);
 
+        when(bookRepository.findById(anyLong())).thenReturn(Optional.of(new BookEntity()));
+        when(authorRepository.findById(anyLong())).thenReturn(Optional.of(new AuthorEntity()));
         when(bookService.updateBook(any(AddNewBookDTO.class), anyLong(), any(MultipartFile.class)))
                 .thenReturn(toReturn);
 
@@ -220,21 +233,23 @@ public class BookRestControllerIT {
     @WithMockUser(authorities = "ROLE_ADMIN")
     @Test
     void adminCannotUpdateBookWhenBookDoesNotExist() throws Exception {
-        when(bookService.updateBook(any(AddNewBookDTO.class), anyLong(), any(MultipartFile.class)))
-                .thenThrow(new BookNotFoundException(1L));
+        when(bookRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(authorRepository.findById(anyLong())).thenReturn(Optional.of(new AuthorEntity()));
 
         mockMvc.perform(multipart(HttpMethod.PUT, "/api/books/{id}", 1L)
                         .file(book)
                         .file(picture))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Book with ID 1 not found"));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Invalid book ID"));
 
-        verify(bookService, times(1)).updateBook(any(AddNewBookDTO.class), anyLong(), any(MultipartFile.class));
+        verify(bookService, never()).updateBook(any(AddNewBookDTO.class), anyLong(), any(MultipartFile.class));
     }
 
     @WithMockUser(authorities = "ROLE_USER")
     @Test
     void userCannotUpdateBook() throws Exception {
+        when(authorRepository.findById(anyLong())).thenReturn(Optional.of(new AuthorEntity()));
+
         mockMvc.perform(multipart(HttpMethod.PUT, "/api/books/{id}", 1L)
                         .file(book)
                         .file(picture))
@@ -257,6 +272,7 @@ public class BookRestControllerIT {
     @WithMockUser(authorities = "ROLE_ADMIN")
     @Test
     void adminCanDeleteBook() throws Exception {
+        when(bookRepository.findById(anyLong())).thenReturn(Optional.of(new BookEntity()));
         doNothing().when(bookService).deleteBook(anyLong());
 
         mockMvc.perform(delete("/api/books/{id}", 1L))
@@ -269,13 +285,13 @@ public class BookRestControllerIT {
     @WithMockUser(authorities = "ROLE_ADMIN")
     @Test
     void adminCannotDeleteBookWhenBookDoesNotExist() throws Exception {
-        doThrow(new BookNotFoundException(1L)).when(bookService).deleteBook(anyLong());
+        when(bookRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         mockMvc.perform(delete("/api/books/{id}", 1L))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Book with ID 1 not found"));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Invalid book ID"));
 
-        verify(bookService, times(1)).deleteBook(anyLong());
+        verify(bookService, never()).deleteBook(anyLong());
     }
 
     @WithMockUser(authorities = "ROLE_USER")
@@ -337,6 +353,7 @@ public class BookRestControllerIT {
 
     @Test
     void canGetBooksByAuthor() throws Exception {
+        when(authorRepository.findById(anyLong())).thenReturn(Optional.of(new AuthorEntity()));
         when(bookService.getBooksByAuthor(1L))
                 .thenReturn(List.of(new BookOverviewDTO(1L, "Pod Igoto", testAuthor, "novel", "picture")));
 
@@ -354,12 +371,11 @@ public class BookRestControllerIT {
 
     @Test
     void testGetBooksByAuthor_Throws_AuthorIdIncorrect() throws Exception {
-        when(bookService.getBooksByAuthor(1L))
-                .thenThrow(AuthorNotFoundException.class);
+        when(authorRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/books?authorId={id}", 1L))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isBadRequest());
 
-        verify(bookService, times(1)).getBooksByAuthor(1L);
+        verify(bookService, never()).getBooksByAuthor(1L);
     }
 }
