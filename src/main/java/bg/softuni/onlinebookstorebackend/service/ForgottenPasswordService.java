@@ -3,7 +3,7 @@ package bg.softuni.onlinebookstorebackend.service;
 import bg.softuni.onlinebookstorebackend.model.email.ForgotPasswordEmailContext;
 import bg.softuni.onlinebookstorebackend.model.entity.SecureTokenEntity;
 import bg.softuni.onlinebookstorebackend.model.entity.UserEntity;
-import bg.softuni.onlinebookstorebackend.model.error.InvalidTokenException;
+import bg.softuni.onlinebookstorebackend.model.exception.InvalidTokenException;
 import bg.softuni.onlinebookstorebackend.repositories.SecureTokenRepository;
 import bg.softuni.onlinebookstorebackend.repositories.UserRepository;
 import jakarta.mail.MessagingException;

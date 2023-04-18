@@ -7,7 +7,7 @@ import bg.softuni.onlinebookstorebackend.model.dto.author.AuthorOverviewDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.search.SearchDTO;
 import bg.softuni.onlinebookstorebackend.model.entity.AuthorEntity;
 import bg.softuni.onlinebookstorebackend.model.entity.PictureEntity;
-import bg.softuni.onlinebookstorebackend.model.error.AuthorNotFoundException;
+import bg.softuni.onlinebookstorebackend.model.exception.AuthorNotFoundException;
 import bg.softuni.onlinebookstorebackend.model.mapper.AuthorMapper;
 import bg.softuni.onlinebookstorebackend.repositories.AuthorRepository;
 import bg.softuni.onlinebookstorebackend.repositories.AuthorSpecification;

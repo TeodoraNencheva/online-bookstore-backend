@@ -1,4 +1,4 @@
-package bg.softuni.onlinebookstorebackend.model.error;
+package bg.softuni.onlinebookstorebackend.model.exception;
 
 import lombok.NoArgsConstructor;
 

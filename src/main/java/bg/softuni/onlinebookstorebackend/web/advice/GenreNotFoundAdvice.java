@@ -1,6 +1,6 @@
 package bg.softuni.onlinebookstorebackend.web.advice;
 
-import bg.softuni.onlinebookstorebackend.model.error.GenreNotFoundException;
+import bg.softuni.onlinebookstorebackend.model.exception.GenreNotFoundException;
 import bg.softuni.onlinebookstorebackend.service.ResponseService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

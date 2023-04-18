@@ -1,6 +1,6 @@
 package bg.softuni.onlinebookstorebackend.web.advice;
 
-import bg.softuni.onlinebookstorebackend.model.error.InvalidTokenException;
+import bg.softuni.onlinebookstorebackend.model.exception.InvalidTokenException;
 import bg.softuni.onlinebookstorebackend.service.ResponseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;

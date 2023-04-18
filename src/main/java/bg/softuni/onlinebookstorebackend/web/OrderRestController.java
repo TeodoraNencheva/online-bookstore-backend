@@ -2,7 +2,7 @@ package bg.softuni.onlinebookstorebackend.web;
 
 import bg.softuni.onlinebookstorebackend.model.dto.order.OrderDetailsDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.order.OrderListDTO;
-import bg.softuni.onlinebookstorebackend.model.error.OrderNotFoundException;
+import bg.softuni.onlinebookstorebackend.model.exception.OrderNotFoundException;
 import bg.softuni.onlinebookstorebackend.service.OrderService;
 import bg.softuni.onlinebookstorebackend.service.ResponseService;
 import bg.softuni.onlinebookstorebackend.user.BookstoreUserDetails;

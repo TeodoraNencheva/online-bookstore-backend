@@ -3,7 +3,7 @@ package bg.softuni.onlinebookstorebackend.web;
 import bg.softuni.onlinebookstorebackend.model.dto.book.AddBookToCartDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.book.BookAddedToCartDTO;
 import bg.softuni.onlinebookstorebackend.model.entity.OrderEntity;
-import bg.softuni.onlinebookstorebackend.model.error.EmptyCartException;
+import bg.softuni.onlinebookstorebackend.model.exception.EmptyCartException;
 import bg.softuni.onlinebookstorebackend.service.BookService;
 import bg.softuni.onlinebookstorebackend.service.OrderService;
 import bg.softuni.onlinebookstorebackend.service.ResponseService;
