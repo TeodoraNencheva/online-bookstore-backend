@@ -6,6 +6,7 @@ import bg.softuni.onlinebookstorebackend.model.dto.author.AuthorNameDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.author.AuthorOverviewDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.search.SearchDTO;
 import bg.softuni.onlinebookstorebackend.model.entity.AuthorEntity;
+import bg.softuni.onlinebookstorebackend.model.validation.ExistingAuthorId;
 import bg.softuni.onlinebookstorebackend.service.AuthorService;
 import bg.softuni.onlinebookstorebackend.service.ResponseService;
 import jakarta.validation.Valid;
@@ -52,7 +53,7 @@ public class AuthorRestController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AuthorDetailsDTO> getAuthorDetails(@PathVariable("id") Long id) {
+    public ResponseEntity<AuthorDetailsDTO> getAuthorDetails(@PathVariable("id") @ExistingAuthorId Long id) {
         AuthorDetailsDTO author = authorService.getAuthorDetails(id);
         return ResponseEntity.ok(author);
     }
@@ -71,7 +72,7 @@ public class AuthorRestController {
     @PutMapping(path = "/{id}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<AuthorEntity> updateAuthor(@Valid @RequestPart(name = "authorModel") AddNewAuthorDTO authorModel,
                                                      @RequestPart(name = "picture", required = false) MultipartFile picture,
-                                                     @PathVariable("id") Long id) throws IOException {
+                                                     @PathVariable("id") @ExistingAuthorId Long id) throws IOException {
 
         AuthorEntity updatedAuthor = authorService.updateAuthor(authorModel, id, picture);
         return ResponseEntity.ok(updatedAuthor);
@@ -79,7 +80,7 @@ public class AuthorRestController {
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteAuthor(@PathVariable("id") Long id) {
+    public ResponseEntity<Object> deleteAuthor(@PathVariable("id") @ExistingAuthorId Long id) {
         authorService.deleteAuthor(id);
 
         Map<String, Object> body = ResponseService.generateGeneralResponse(String.format("Author with ID %s deleted", id));

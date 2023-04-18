@@ -1,22 +1,22 @@
 spring:
   datasource:
     # for heroku
-    driverClassName: org.postgresql.Driver
-    url: ${JDBC_DATABASE_URL:}
-    username: ${JDBC_DATABASE_USERNAME:}
-    password: ${JDBC_DATABSE_PASSWORD:}
+#    driverClassName: org.postgresql.Driver
+#    url: ${JDBC_DATABASE_URL:}
+#    username: ${JDBC_DATABASE_USERNAME:}
+#    password: ${JDBC_DATABASE_PASSWORD:}
 
   # for local run
-#    driverClassName: com.mysql.cj.jdbc.Driver
-#    url: jdbc:mysql://localhost:3306/bookstore-backend?allowPublicKeyRetrieval=true&useSSL=false&createDatabaseIfNotExist=true&serverTimezone=UTC
-#    username: root
-#    password: 1234
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/bookstore-backend?allowPublicKeyRetrieval=true&useSSL=false&createDatabaseIfNotExist=true&serverTimezone=UTC
+    username: root
+    password: 1234
   jpa:
-    # for heroku
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+#    # for heroku
+#    database-platform: org.hibernate.dialect.PostgreSQLDialect
 
     # for local run
-#    database-platform: org.hibernate.dialect.MySQLDialect
+    database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       ddl-auto: create-drop
     defer-datasource-initialization: true

@@ -199,7 +199,7 @@ public class BookRestControllerIT {
         bookPicture.setUrl("picture url");
         BookEntity toReturn = new BookEntity(bookDto, testAuthor, new GenreEntity("novel"), bookPicture);
 
-        when(bookService.updateBook(any(AddNewBookDTO.class), anyLong()))
+        when(bookService.updateBook(any(AddNewBookDTO.class), anyLong(), any(MultipartFile.class)))
                 .thenReturn(toReturn);
 
         mockMvc.perform(multipart(HttpMethod.PUT, "/api/books/{id}", 1L)
@@ -214,13 +214,13 @@ public class BookRestControllerIT {
                 .andExpect(jsonPath("$.price").value(20))
                 .andExpect(jsonPath("$.picture.url").value("picture url"));
 
-        verify(bookService, times(1)).updateBook(any(AddNewBookDTO.class), anyLong());
+        verify(bookService, times(1)).updateBook(any(AddNewBookDTO.class), anyLong(), any(MultipartFile.class));
     }
 
     @WithMockUser(authorities = "ROLE_ADMIN")
     @Test
     void adminCannotUpdateBookWhenBookDoesNotExist() throws Exception {
-        when(bookService.updateBook(any(AddNewBookDTO.class), anyLong()))
+        when(bookService.updateBook(any(AddNewBookDTO.class), anyLong(), any(MultipartFile.class)))
                 .thenThrow(new BookNotFoundException(1L));
 
         mockMvc.perform(multipart(HttpMethod.PUT, "/api/books/{id}", 1L)
@@ -229,7 +229,7 @@ public class BookRestControllerIT {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Book with ID 1 not found"));
 
-        verify(bookService, times(1)).updateBook(any(AddNewBookDTO.class), anyLong());
+        verify(bookService, times(1)).updateBook(any(AddNewBookDTO.class), anyLong(), any(MultipartFile.class));
     }
 
     @WithMockUser(authorities = "ROLE_USER")

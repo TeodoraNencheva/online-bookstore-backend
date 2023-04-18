@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
@@ -25,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -49,13 +51,14 @@ public class AuthorServiceTest {
     private CloudinaryService cloudinaryService;
     private MockMultipartFile picture;
     private AddNewAuthorDTO authorModel;
+    @InjectMocks
     private AuthorService underTest;
 
-    @BeforeEach
-    void setUp() {
-        underTest = new AuthorService(authorRepository, bookRepository, authorMapper,
-                pictureRepository, cloudinaryService);
-    }
+//    @BeforeEach
+//    void setUp() {
+//        underTest = new AuthorService(authorRepository, bookRepository, authorMapper,
+//                pictureRepository, cloudinaryService);
+//    }
 
     @Test
     void canGetAllAuthorsPaged() {
