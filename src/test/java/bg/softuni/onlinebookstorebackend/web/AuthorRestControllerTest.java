@@ -5,7 +5,7 @@ import bg.softuni.onlinebookstorebackend.model.dto.author.AuthorDetailsDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.author.AuthorOverviewDTO;
 import bg.softuni.onlinebookstorebackend.model.dto.search.SearchDTO;
 import bg.softuni.onlinebookstorebackend.model.entity.AuthorEntity;
-import bg.softuni.onlinebookstorebackend.model.error.AuthorNotFoundException;
+import bg.softuni.onlinebookstorebackend.repositories.AuthorRepository;
 import bg.softuni.onlinebookstorebackend.service.AuthorService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -39,6 +40,9 @@ class AuthorRestControllerTest {
 
     @MockBean
     private AuthorService authorService;
+
+    @MockBean
+    private AuthorRepository authorRepository;
 
     private MockMultipartFile picture;
     private AddNewAuthorDTO authorDto;
@@ -73,6 +77,7 @@ class AuthorRestControllerTest {
 
     @Test
     void canGetAuthorDetails() throws Exception {
+        when(authorRepository.findById(anyLong())).thenReturn(Optional.of(new AuthorEntity()));
         when(authorService.getAuthorDetails(anyLong()))
                 .thenReturn(new AuthorDetailsDTO(1L, "Ivan Vazov", "biography", "picture"));
 
@@ -88,14 +93,11 @@ class AuthorRestControllerTest {
 
     @Test
     void cannotGetAuthorDetailsWhenAuthorDoesNotExist() throws Exception {
-        when(authorService.getAuthorDetails(anyLong()))
-                .thenThrow(new AuthorNotFoundException(1L));
+        when(authorRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/authors/{id}", 1L))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Author with ID 1 not found"));
-
-        verify(authorService, times(1)).getAuthorDetails(1L);
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Invalid author ID"));
     }
 
     @WithMockUser(authorities = "ROLE_ADMIN")
@@ -144,6 +146,7 @@ class AuthorRestControllerTest {
     void adminCanUpdateAuthor() throws Exception {
         AuthorEntity toReturn = new AuthorEntity(authorDto);
 
+        when(authorRepository.findById(anyLong())).thenReturn(Optional.of(new AuthorEntity()));
         when(authorService.updateAuthor(any(AddNewAuthorDTO.class), anyLong(), any(MultipartFile.class)))
                 .thenReturn(toReturn);
 
@@ -161,17 +164,13 @@ class AuthorRestControllerTest {
     @WithMockUser(authorities = "ROLE_ADMIN")
     @Test
     void adminCannotUpdateAuthorWhenAuthorDoesNotExist() throws Exception {
-        when(authorService.updateAuthor(any(AddNewAuthorDTO.class), anyLong(), any(MultipartFile.class)))
-                .thenThrow(new AuthorNotFoundException(1L));
+        when(authorRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         mockMvc.perform(multipart(HttpMethod.PUT, "/api/authors/{id}", 1L)
                         .file(author)
                         .file(picture))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Author with ID 1 not found"));
-
-        verify(authorService, times(1))
-                .updateAuthor(any(AddNewAuthorDTO.class), anyLong(), any(MultipartFile.class));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Invalid author ID"));
     }
 
     @WithMockUser(authorities = "ROLE_USER")
@@ -199,6 +198,7 @@ class AuthorRestControllerTest {
     @WithMockUser(authorities = "ROLE_ADMIN")
     @Test
     void adminCanDeleteAuthor() throws Exception {
+        when(authorRepository.findById(anyLong())).thenReturn(Optional.of(new AuthorEntity()));
         doNothing().when(authorService).deleteAuthor(anyLong());
 
         mockMvc.perform(delete("/api/authors/{id}", 1L))
@@ -211,14 +211,11 @@ class AuthorRestControllerTest {
     @WithMockUser(authorities = "ROLE_ADMIN")
     @Test
     void adminCannotDeleteAuthorWhenAuthorDoesNotExist() throws Exception {
-        doThrow(new AuthorNotFoundException(1L)).when(authorService).deleteAuthor(anyLong());
+        when(authorRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         mockMvc.perform(delete("/api/authors/{id}", 1L))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Author with ID 1 not found"));
-
-        verify(authorService, times(1))
-                .deleteAuthor(anyLong());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Invalid author ID"));
     }
 
     @WithMockUser(authorities = "ROLE_USER")

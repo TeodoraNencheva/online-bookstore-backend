@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,6 +30,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/authors")
+@Validated
 public class AuthorRestController {
     private final AuthorService authorService;
 
@@ -53,7 +55,7 @@ public class AuthorRestController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AuthorDetailsDTO> getAuthorDetails(@PathVariable("id") @ExistingAuthorId Long id) {
+    public ResponseEntity<AuthorDetailsDTO> getAuthorDetails(@ExistingAuthorId @PathVariable Long id) {
         AuthorDetailsDTO author = authorService.getAuthorDetails(id);
         return ResponseEntity.ok(author);
     }

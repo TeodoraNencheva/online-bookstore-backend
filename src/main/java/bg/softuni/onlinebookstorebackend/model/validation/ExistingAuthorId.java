@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE_USE, ElementType.FIELD, ElementType.PARAMETER})
 @Constraint(validatedBy = ExistingAuthorIdValidator.class)
 public @interface ExistingAuthorId {
-    String message() default "Invalid author id";
+    String message() default "Invalid author ID";
 
     Class<?>[] groups() default {};
 

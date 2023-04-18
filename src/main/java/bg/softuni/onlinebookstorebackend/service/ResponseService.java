@@ -8,7 +8,7 @@ import java.util.Map;
 
 @Service
 public class ResponseService {
-    public static Map<String, Object> generateGeneralResponse(String message) {
+    public static Map<String, Object> generateGeneralResponse(Object message) {
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("timestamp", LocalDateTime.now().toString());
         response.put("message", message);
