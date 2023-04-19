@@ -16,6 +16,9 @@
 ### 4. Cloudinary
 * the application uses Cloudinary for image upload
 
+### 5. Exception handling
+* via @ControllerAdvice and @ExceptionHandler
+
 ## II. Authentication
 
 ### 1. Logging into the app as regular user 
