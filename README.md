@@ -1,7 +1,22 @@
 # Online bookstore - REST API built with Spring Boot
 ## The application has the basic functionalities of an online bookstore - listing books and authors for all users - authenticated and unauthenticated, adding to cart and buying books for authenticated regular users (customers) and adding new books and authors as well as processing orders and deleting customers for admins.
 
-## I. Authentication
+## I. General information
+### 1. Database model
+![database model](https://user-images.githubusercontent.com/79698998/233033429-70881cb9-f6fd-4145-ac94-f3f8e5d4d8f1.PNG)
+
+### 2. Maintenance interceptor
+* the bookstore should be closed due to maintenance every Sunday between midnight and 5am
+* the interceptor checks the current time and if it is maintenance time, redirects to the "/api/maintenance" endpoint
+
+### 3. Scheduler
+* the application keeps track of the count of orders made on the current date
+* in order to start counting the orders from 0 every day, the scheduler sets the counter to 0 every day at midnight
+
+### 4. Cloudinary
+* the application uses Cloudinary for image upload
+
+## II. Authentication
 
 ### 1. Logging into the app as regular user 
 * POST request to https://powerful-beach-00895.herokuapp.com/api/auth/login with either of these:
@@ -24,7 +39,7 @@
 ### 4. Confirming a registration
 * POST request to https://powerful-beach-00895.herokuapp.com/api/auth/register/verify?token={token} where token is the secure token generated for the given registration confirmation
 
-## II. Functionalities available to all users
+## III. Functionalities available to all users
 ### 1. Listing all books
 * GET request to https://powerful-beach-00895.herokuapp.com/api/books/all - returns the first 5 books ordered by title
 * GET request to https://powerful-beach-00895.herokuapp.com/api/books/all?page={page}&size={size} for custom pagination and sizing
@@ -66,7 +81,7 @@
 * the request body should contain the secure token for the password change, new password and password confirmation
 * request body example: {"token": "randomToken". "password": "new password", "confirmPassword": "new password"}
 
-## III. Functionalities available to authenticated regular users (customers) - all request should be performed with a valid JWT
+## IV. Functionalities available to authenticated regular users (customers) - all request should be performed with a valid JWT
 ### 1. Viewing own cart
 * GET request to https://powerful-beach-00895.herokuapp.com/api/cart
 
@@ -91,7 +106,7 @@
 * GET request to https://powerful-beach-00895.herokuapp.com/api/orders/{id}/details where id is the UUID of the order
 
 
-## IV. Functionalities available to admins - all requests should be performed with a valid JWT
+## V. Functionalities available to admins - all requests should be performed with a valid JWT
 ### 1. Adding a new author
 * POST request to https://powerful-beach-00895.herokuapp.com/api/authors/add
 * the request accepts two request parts - 1) a DTO with valid first name, last name and biography and 2) a picture (optional)
